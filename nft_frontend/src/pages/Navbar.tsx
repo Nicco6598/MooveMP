@@ -1,4 +1,3 @@
-import React,{useState} from 'react';
 import ConnectWalletButton from './ConnectWalletButton';
 
 const Navbar = () => {
