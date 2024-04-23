@@ -107,7 +107,7 @@ const NFTDetails: React.FC = () => {
                                     <p>
                                         <span className="font-bold">Owner:</span> {`${details.owner.slice(0, 6)}...${details.owner.slice(-4)}`}
                                     </p>
-                                    <p className="text-amber-600 font-bold mt-6 mb-6">
+                                    <p className="text-orange-600 font-bold mt-6 mb-6">
                                         <span>Prezzo Attuale:</span> {ethers.utils.formatEther(details.price)} ETH
                                     </p>
                                     <p  className="font-bold text-sky-600">
@@ -122,9 +122,9 @@ const NFTDetails: React.FC = () => {
                                                 placeholder="Offri un prezzo in ETH"
                                                 value={newPrice}
                                                 onChange={e => setNewPrice(e.target.value)}
-                                                className="border p-2 ml-2 mr-2"
+                                                className="border p-3 rounded-xl w-full"
                                             />
-                                            <button onClick={handleBid} className="bg-yellow-500 text-white p-2 w-16 rounded-md hover:bg-yellow-700 transition-colors duration-300 ml-2 mr-2">Bid</button>
+                                            <button onClick={handleBid} className="bg-purple-500 text-white p-3 w-40 rounded-xl hover:bg-purple-700 transition-colors duration-300 ml-2 mr-2">Bid</button>
                                         </div>
                                     )}
                                     {details.auctionDuration === 0 && (
@@ -134,21 +134,23 @@ const NFTDetails: React.FC = () => {
                                                 placeholder="Imposta nuovo Prezzo in ETH"
                                                 value={newPrice}
                                                 onChange={e => setNewPrice(e.target.value)}
-                                                className="border p-2 ml-2 mr-2"
+                                                className="border p-3 rounded-xl w-full"
                                             />
-                                            <button onClick={handleSetPrice} className="bg-sky-500 text-white p-2 rounded-md hover:bg-sky-700 transition-colors duration-300 ml-2 mr-2">Imposta Prezzo</button>
+                                            <button onClick={handleSetPrice} className="bg-orange-500 text-white p-3 rounded-xl hover:bg-orange-700 transition-colors duration-300 ml-2 mr-2">Imposta Prezzo</button>
                                         </div>
                                     )}
+                                    {details.auctionDuration === 0 && (
                                     <div className="flex items-center">
                                         <input
                                             type="text"
                                             placeholder="Durata Asta in giorni"
                                             value={auctionDuration}
                                             onChange={e => setAuctionDuration(e.target.value)}
-                                            className="border p-2 ml-2 mr-2"
+                                            className="border p-3 rounded-xl w-full"
                                         />
-                                        <button onClick={handleStartAuction} className="bg-emerald-500 text-white p-2 rounded-md hover:bg-green-700 transition-colors duration-300 ml-2 mr-2">Inizia Asta</button>
+                                        <button onClick={handleStartAuction} className="bg-sky-500 text-white p-3 rounded-xl hover:bg-sky-700 transition-colors duration-300 ml-2 mr-2">Inizia Asta</button>
                                     </div>
+                                    )}
                                 </div>
                             </div>
                         </div>
@@ -157,7 +159,7 @@ const NFTDetails: React.FC = () => {
                         <div className="text-lg font-bold mb-2">Miglior Offerta:</div>
                         <div className="text-xl mb-2">{ethers.utils.formatEther(details.highestBid)} ETH</div>
                         <div className="text-lg font-bold mb-2">Miglior Offerente:</div>
-                        <div className={details.highestBidder === window.ethereum.selectedAddress ? 'text-red-500 font-bold' : 'text-green-500 font-bold'}>
+                        <div className={details.highestBidder === window.ethereum.selectedAddress ? 'text-red-500 font-bold' : 'text-blue-500 font-bold'}>
                             {details.highestBidder === window.ethereum.selectedAddress ? 'Tu' : details.highestBidder}
                         </div>
                     </div>

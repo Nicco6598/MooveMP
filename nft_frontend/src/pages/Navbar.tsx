@@ -4,7 +4,7 @@ import { Link } from 'react-router-dom';
 
 const Navbar = () => {
   return (
-    <nav className="sticky top-4 justify-items-center z-10 bg-gradient-to-r from-sky-200 to-purple-200 rounded-2xl shadow-[0px_0px_10px_10px_#edf2f7]">
+    <nav className="sticky top-4 justify-items-center z-10 bg-gradient-to-r from-purple-200 to-sky-200 rounded-2xl shadow-[0px_0px_10px_10px_#edf2f7]">
       <div className="container mx-auto max-w-screen-xl transition-all duration-300 flex justify-between items-center p-4">
         <div className="flex items-center">
           <img src="/logo.png" alt="Logo" className="w-24 mr-4" />
