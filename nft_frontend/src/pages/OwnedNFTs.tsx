@@ -6,6 +6,10 @@ import getContract from '../utils/getContract';
 interface NFT {
     tokenId: number;
     owner: string;
+    price: ethers.BigNumber;
+    rarity: string;
+    discount: string;
+    discountOn: string;
 }
 
 const OwnedNFTs: React.FC = () => {
@@ -21,7 +25,10 @@ const OwnedNFTs: React.FC = () => {
             for (let i = 0; i < totalSupply.toNumber(); i++) {
                 const owner = await contract.ownerOf(i);
                 if (owner === await signer.getAddress()) {
-                    items.push({ tokenId: i, owner });
+                    const tokenPrice = await contract.tokenPrices(i);
+                    const tokenAttributes = await contract.getTokenAttributes(i);
+                    const [rarity, discount, discountOn] = tokenAttributes.split(',').map((attr: string) => attr.trim());
+                    items.push({ tokenId: i, owner, price: tokenPrice, rarity, discount, discountOn });
                 }
             }
             setNfts(items);
@@ -32,18 +39,33 @@ const OwnedNFTs: React.FC = () => {
 
     return (
         <div className="p-5">
-            <h1 className="text-2xl font-bold mb-5">I Miei NFT</h1>
-            <div className="grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-3">
+            <h1 className="text-2xl font-bold mb-10">I Miei NFT</h1>
+            <div className="grid grid-cols-1 gap-8 md:grid-cols-3 lg:grid-cols-6">
                 {nfts.map(nft => (
-                    <div key={nft.tokenId} className="text-center bg-white rounded-2xl shadow-[0_8px_30px_rgb(0,0,0,0.12)] hover:shadow-[0_20px_50px_rgba(0,_10,_184,_0.2)] transition-all duration-300 ease-in-out transform hover:scale-105 cursor-pointer p-4">
-                        <img src={`https://ipfs.io/ipfs/IMAGE_HASH`} alt={`NFT ${nft.tokenId}`} className="w-full h-auto mb-2 rounded-lg" />
-                        <p className="text-sm">
-                            <span className="font-bold">Token ID: {nft.tokenId}</span> 
+                    <div key={nft.tokenId} className="text-center bg-white rounded-lg shadow-[0px_0px_15px_5px_#edf2f7] hover:shadow-[0px_0px_15px_10px_#BEE3F8] transition-all duration-300 ease-in-out transform hover:scale-105 cursor-pointer p-4">
+                        <img src={`https://images.unsplash.com/photo-1707344088547-3cf7cea5ca49?q=80&w=300&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDF8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D`} alt={`NFT ${nft.tokenId}`} className=" h-auto mb-4 rounded-lg mx-auto" />
+                        <p className="text-sm mb-1">
+                            <span className="font-bold">Token ID:</span> {nft.tokenId}
                         </p>
-                        <p className="text-sm">
-                            <span className="italic">Owner:</span> {nft.owner}
+                        <p className="text-sm mb-1">
+                            <span className="font-bold">Proprietario: </span> 
+                                {`${nft.owner.slice(0, 5)}...${nft.owner.slice(-3)}`}
                         </p>
-                        <Link to={`/nft/${nft.tokenId}`} className="text-blue-500 hover:underline text-sm">Visualizza Dettagli</Link>
+                        <p className="text-sm mb-1">
+                            <span className="font-bold ">Prezzo:</span> {ethers.utils.formatEther(nft.price)} ETH
+                        </p>
+                        <p className="text-sm mb-1">
+                            <span className="font-bold">{nft.rarity}</span> 
+                        </p>
+                        <p className="text-sm mb-1">
+                            <span className="font-bold">{nft.discount}</span> 
+                        </p>
+                        <p className="text-sm mb-4">
+                            <span className="font-bold">{nft.discountOn}</span> 
+                        </p>
+                        <Link to={`/nft/${nft.tokenId}`} className="bg-sky-600 text-white p-2 rounded-lg hover:bg-blue-700 transition-colors duration-300 ease-in-out">
+                                Visualizza Dettagli
+                            </Link>
                     </div>
                 ))}
             </div>

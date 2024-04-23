@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
-import { BrowserRouter as Router, Route } from 'react-router-dom';
+import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 import Navbar from './pages/Navbar';
-import './index.css'; // Importa il foglio di stile di Tailwind CSS
+import './index.css'; // Import the Tailwind CSS style sheet
 import { ProviderProvider } from './pages/ProviderContext';
 import Marketplace from './pages/Marketplace';
 import MintNFT from './pages/MintNFT';
@@ -12,8 +12,8 @@ const App: React.FC = () => {
   const [isLoggedIn, setIsLoggedIn] = useState<boolean>(false);
 
   const handleConnectMagicLink = () => {
-    // Implementa la logica per la connessione con MagicLink
-    // Quando l'utente è connesso con successo, imposta isLoggedIn su true
+    // Implement the logic for connecting with MagicLink
+    // When the user is successfully connected, set isLoggedIn to true
     setIsLoggedIn(true);
   };
 
@@ -21,10 +21,14 @@ const App: React.FC = () => {
     <Router>
       <div>
         <ProviderProvider>
-        <Navbar />
-        <Marketplace />
-        <MintNFT />
-        <OwnedNFTs />
+          <Navbar />
+          <Routes>
+            <Route path="/marketplace" element={<Marketplace />} />
+            <Route path="/mint" element={<MintNFT />} />
+            <Route path="/owned" element={<OwnedNFTs />} />
+            <Route path="/nft/:tokenId" element={<NFTDetails />} />
+            <Route path="/" element={<Marketplace />} />  {/* Ensure this is the last Route if you want it to be the default */}
+          </Routes>
         </ProviderProvider>
       </div>
     </Router>

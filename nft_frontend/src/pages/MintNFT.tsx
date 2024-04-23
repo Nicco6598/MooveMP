@@ -4,12 +4,20 @@ import getContract from '../utils/getContract';
 
 const MintNFT: React.FC = () => {
     const [price, setPrice] = useState('');
+    const [rarity, setRarity] = useState('');
+    const [discount, setDiscount] = useState('');
+    const [discountOn, setDiscountOn] = useState('');
     const signer = new ethers.providers.Web3Provider(window.ethereum).getSigner();
 
     const handleMint = async () => {
         const contract = getContract(signer);
         try {
-            const tx = await contract.createNFT(ethers.utils.parseEther(price));
+            const tx = await contract.createNFT(
+                ethers.utils.parseEther(price),
+                rarity,
+                discount,
+                discountOn
+            );
             await tx.wait();
             alert('NFT Mintato con successo!');
         } catch (error) {
@@ -18,16 +26,44 @@ const MintNFT: React.FC = () => {
     };
 
     return (
-        <div className="p-5">
-            <h1 className="text-2xl font-bold mb-5">Mint NFT</h1>
-            <input
-                type="text"
-                placeholder="Prezzo in ETH"
-                value={price}
-                onChange={e => setPrice(e.target.value)}
-                className="border p-2 rounded-2xl"
-            />
-            <button onClick={handleMint} className="bg-purple-500 ml-4 text-white p-2 text-white text-center py-2 px-6 rounded-2xl shadow-lg hover:shadow-2xl hover:bg-amber-600 transition-all duration-300 ease-in-out transform hover:scale-105">Mint</button>
+        <div className="flex justify-center items-center h-screen">
+            <div className="p-8 bg-white rounded-lg shadow-[0px_0px_15px_5px_#edf2f7] hover:shadow-[0px_0px_20px_10px_#e9d8fd] transition-all duration-300 ease-in-out transform hover:scale-105 max-w-md w-full">
+                <h1 className="text-2xl font-bold mb-5">Mint NFT</h1>
+                <input
+                    type="text"
+                    placeholder="Prezzo in ETH"
+                    value={price}
+                    onChange={e => setPrice(e.target.value)}
+                    className="border p-3 rounded-xl mb-4 w-full"
+                />
+                <input
+                    type="text"
+                    placeholder="Rarità"
+                    value={rarity}
+                    onChange={e => setRarity(e.target.value)}
+                    className="border p-3 rounded-xl mb-4 w-full"
+                />
+                <input
+                    type="text"
+                    placeholder="Scontistica"
+                    value={discount}
+                    onChange={e => setDiscount(e.target.value)}
+                    className="border p-3 rounded-xl mb-4 w-full"
+                />
+                <input
+                    type="text"
+                    placeholder="Sconto su"
+                    value={discountOn}
+                    onChange={e => setDiscountOn(e.target.value)}
+                    className="border p-3 rounded-xl mb-4 w-full"
+                />
+                <button
+                    onClick={handleMint}
+                    className="bg-purple-500 text-white p-3 rounded-xl text-center w-full hover:bg-emerald-500 transition-all duration-300 ease-in-out"
+                >
+                    Mint
+                </button>
+            </div>
         </div>
     );
 };
