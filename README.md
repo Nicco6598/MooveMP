@@ -3,4 +3,4 @@ An NFT Marketplace developed with Solidity, React and Hardhat
 
 # Info Contratto
 
-Il contratto è deployato al seguente indirizzo su Rete Sepolia [0x721c187CB9dad6E127Db3C4a615Bf1f984e7C301](https://sepolia.etherscan.io/address/0x721c187CB9dad6E127Db3C4a615Bf1f984e7C301 "Indirizzo del Contratto") 
+Il contratto è deployato al seguente indirizzo su Rete Sepolia [0xE1ECa838De70e2143A52Cf11a31DA3A611F22750](https://sepolia.etherscan.io/address/0xE1ECa838De70e2143A52Cf11a31DA3A611F22750 "Indirizzo del Contratto") 

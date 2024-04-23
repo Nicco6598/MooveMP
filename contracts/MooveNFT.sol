@@ -67,6 +67,16 @@ contract MooveNFT is ERC721, ReentrancyGuard, Ownable {
         _transfer(ownerOf(tokenId), msg.sender, tokenId);
     }
 
+    // Funzione per avviare un'asta per un determinato periodo di giorni
+    function startAuction(uint256 tokenId, uint256 durationInDays) external onlyOwner {
+        require(ownerOf(tokenId) == owner(), "Caller is not the owner");
+        require(durationInDays > 0, "Invalid duration");
+
+        uint256 durationInSeconds = durationInDays * 1 days;
+        uint256 auctionEndTimestamp = block.timestamp + durationInSeconds;
+        auctionEnds[tokenId] = auctionEndTimestamp;
+    }
+
     // Funzione per effettuare un'offerta in un'asta
     function bid(uint256 tokenId) public payable nonReentrant {
         require(block.timestamp < auctionEnds[tokenId], "Auction ended");
