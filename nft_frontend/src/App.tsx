@@ -7,6 +7,7 @@ import Marketplace from './pages/Marketplace';
 import MintNFT from './pages/MintNFT';
 import NFTDetails from './pages/NFTDetails';
 import OwnedNFTs from './pages/OwnedNFTs';
+import PurchaseHistory from './pages/PurchaseHistory';
 
 const App: React.FC = () => {
   const [isLoggedIn, setIsLoggedIn] = useState<boolean>(false);
@@ -27,6 +28,7 @@ const App: React.FC = () => {
             <Route path="/mint" element={<MintNFT />} />
             <Route path="/owned" element={<OwnedNFTs />} />
             <Route path="/nft/:tokenId" element={<NFTDetails />} />
+            <Route path="/history" element={<PurchaseHistory />} />
             <Route path="/" element={<Marketplace />} />  {/* Ensure this is the last Route if you want it to be the default */}
           </Routes>
         </ProviderProvider>

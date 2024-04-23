@@ -10,6 +10,7 @@ contract MooveNFT is ERC721, ReentrancyGuard, Ownable {
     using Strings for uint256;
 
     mapping(uint256 => uint256) public tokenPrices; // Maps token ID to its price
+    mapping(uint256 => bool) public isForSale; // Maps token ID to its sale state
     uint256 public nextTokenId = 0; // Next token ID to be minted
     mapping(uint256 => address) public highestBidder; // Maps token ID to highest bidder
     mapping(uint256 => uint256) public highestBid; // Maps token ID to highest bid
@@ -18,7 +19,7 @@ contract MooveNFT is ERC721, ReentrancyGuard, Ownable {
     mapping(uint256 => string) public tokenAttributes; // Maps token ID to its attributes
 
     // Mapping per tenere traccia dello storico degli acquisti e delle vendite
-    mapping(uint256 => PurchaseHistory) public purchaseHistories;
+    mapping(uint256 => PurchaseHistory[]) public purchaseHistories;
 
     struct PurchaseHistory {
         address buyer;
@@ -35,7 +36,14 @@ contract MooveNFT is ERC721, ReentrancyGuard, Ownable {
         _mint(owner(), nextTokenId);
         tokenPrices[nextTokenId] = price;
         tokenAttributes[nextTokenId] = string(abi.encodePacked("Rarity: ", rarity, ", Discount: ", discount, ", Discount On: ", discountOn));
+        isForSale[nextTokenId] = true; // Imposta l'NFT come in vendita
         nextTokenId++;
+    }
+
+    function sale(uint256 tokenId, uint256 price) public {
+        require(ownerOf(tokenId) == msg.sender, "Caller is not the owner");
+        tokenPrices[tokenId] = price;
+        isForSale[tokenId] = true ;
     }
 
     // Funzione per visualizzare gli attributi di un token
@@ -51,17 +59,21 @@ contract MooveNFT is ERC721, ReentrancyGuard, Ownable {
 
     // Funzione per acquistare un NFT tramite asta
     function purchaseNFT(uint256 tokenId) public payable nonReentrant {
-        require(msg.value == tokenPrices[tokenId], "Incorrect price");
-        require(ownerOf(tokenId) == address(this) || ownerOf(tokenId) == msg.sender, "Caller is not owner nor approved");
-        
+        require(isForSale[tokenId], "NFT not for sale"); // Verifica se l'NFT è in vendita
+        require(ownerOf(tokenId) != msg.sender, "Creator cannot purchase own NFT");
+        require(msg.value >= tokenPrices[tokenId], "Insufficient funds");
+
+        // Imposta lo stato di vendita a false dopo l'acquisto
+        isForSale[tokenId] = false;
+
         // Aggiornamento dello storico degli acquisti e delle vendite
-        purchaseHistories[tokenId] = PurchaseHistory({
+        purchaseHistories[tokenId].push(PurchaseHistory({
             buyer: msg.sender,
             seller: ownerOf(tokenId),
             price: msg.value,
             timestamp: block.timestamp,
             transactionType: "Direct Purchase"
-        });
+        }));
 
         // Trasferimento dell'NFT
         _transfer(ownerOf(tokenId), msg.sender, tokenId);
@@ -87,13 +99,13 @@ contract MooveNFT is ERC721, ReentrancyGuard, Ownable {
         }
 
         // Aggiornamento dello storico degli acquisti e delle vendite
-        purchaseHistories[tokenId] = PurchaseHistory({
+        purchaseHistories[tokenId].push(PurchaseHistory({
             buyer: msg.sender,
             seller: highestBidder[tokenId],
             price: msg.value,
             timestamp: block.timestamp,
             transactionType: "Auction"
-        });
+        }));
 
         // Aggiornamento del miglior offerente e dell'offerta più alta
         highestBidder[tokenId] = msg.sender;
@@ -128,5 +140,10 @@ contract MooveNFT is ERC721, ReentrancyGuard, Ownable {
     function transferNFT(address from, address to, uint256 tokenId) public {
         require(_isAuthorized(ownerOf(tokenId), msg.sender, tokenId), "Caller is not owner nor approved");
         _transfer(from, to, tokenId);
+    }
+
+    // Funzione per recuperare tutti i dati di purchaseHistories per un dato token ID
+    function getPurchaseHistory(uint256 tokenId) public view returns (PurchaseHistory[] memory) {
+        return purchaseHistories[tokenId];
     }
 }

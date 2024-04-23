@@ -73,7 +73,7 @@ const NFTDetails: React.FC = () => {
             const signer = new ethers.providers.Web3Provider(window.ethereum).getSigner();
             const contract = getContract(signer);
 
-            await contract.setPrice(details.tokenId, ethers.utils.parseEther(newPrice));
+            await contract.sale(details.tokenId, ethers.utils.parseEther(newPrice));
             alert('Prezzo impostato con successo!');
         }
     };
@@ -105,7 +105,7 @@ const NFTDetails: React.FC = () => {
                                         <span className="font-bold">Token ID:</span> {details.tokenId}
                                     </p>
                                     <p>
-                                        <span className="font-bold">Owner:</span> {`${details.owner.slice(0, 6)}...${details.owner.slice(-4)}`}
+                                        <span className="font-bold">Owner:</span> {`${details.owner.slice(0, 7)}...${details.owner.slice(-5)}`}
                                     </p>
                                     <p className="text-orange-600 font-bold mt-6 mb-6">
                                         <span>Prezzo Attuale:</span> {ethers.utils.formatEther(details.price)} ETH
@@ -131,10 +131,10 @@ const NFTDetails: React.FC = () => {
                                         <div className="flex items-center mr-4">
                                             <input
                                                 type="text"
-                                                placeholder="Imposta nuovo Prezzo in ETH"
+                                                placeholder="Prezzo ETH"
                                                 value={newPrice}
                                                 onChange={e => setNewPrice(e.target.value)}
-                                                className="border p-3 rounded-xl w-full"
+                                                className="border p-3 rounded-xl w-auto"
                                             />
                                             <button onClick={handleSetPrice} className="bg-orange-500 text-white p-3 rounded-xl hover:bg-orange-700 transition-colors duration-300 ml-2 mr-2">Imposta Prezzo</button>
                                         </div>
@@ -146,7 +146,7 @@ const NFTDetails: React.FC = () => {
                                             placeholder="Durata Asta in giorni"
                                             value={auctionDuration}
                                             onChange={e => setAuctionDuration(e.target.value)}
-                                            className="border p-3 rounded-xl w-full"
+                                            className="border p-3 rounded-xl w-auto"
                                         />
                                         <button onClick={handleStartAuction} className="bg-sky-500 text-white p-3 rounded-xl hover:bg-sky-700 transition-colors duration-300 ml-2 mr-2">Inizia Asta</button>
                                     </div>

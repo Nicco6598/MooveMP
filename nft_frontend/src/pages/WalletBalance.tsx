@@ -26,7 +26,7 @@ const WalletBalance: React.FC<WalletBalanceProps> = ({ account }) => {
   return (
     <div>
       {account && (
-        <div className="bg-neutral-200 text-white text-center py-2 px-4 rounded-xl transition-all lg:ml-4 ">
+        <div className="bg-gray-200 text-white text-center py-2 px-4 rounded-xl transition-all lg:ml-4 ">
           <p className="text-sm sm:flex sm:justify-between sm:items-center">
             <span className="font-bold text-sm text-gray-900 sm:inline hidden">
               {balance} ETH
