@@ -44,14 +44,14 @@ const PurchaseHistory = () => {
         fetchHistory();
     }, []);
 
-    if (loading) return <p>Loading...</p>;
+    if (loading) return <p className="mt-16 flex flex-col items-center pt-8">Loading...</p>;
 
     return (
         <div className="p-5">
             <h1 className="mb-16 flex flex-col items-center pt-8">PURCHASE HISTORY</h1>
-            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 mt-5 w-full max-w-3xl">
+            <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 mt-5 w-full max-w-3xl">
                 {history.map((item, index) => (
-                    <div key={index} className="bg-white rounded-lg shadow-md p-4 hover:shadow-lg transition duration-300">
+                    <div key={index} className="bg-white rounded-lg shadow-[0px_0px_15px_5px_#edf2f7] hover:shadow-[0px_0px_15px_10px_#EBF4FF] transition-all duration-300 ease-in-out transform hover:scale-105 p-4">
                         <p className="text-gray-700 text-sm font-bold mb-1 truncate">Token ID: {item.tokenId}</p>
                         <p className="text-gray-700 text-sm font-semibold mb-1 truncate">
                             Buyer: <a href={`https://sepolia.etherscan.io/address/${item.buyer}`} target="_blank" rel="noopener noreferrer" className="text-blue-500 hover:underline">{item.buyer}</a>
