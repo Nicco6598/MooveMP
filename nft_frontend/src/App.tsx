@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 import Navbar from './pages/Navbar';
 import './index.css'; // Import the Tailwind CSS style sheet
@@ -10,13 +10,6 @@ import OwnedNFTs from './pages/OwnedNFTs';
 import PurchaseHistory from './pages/PurchaseHistory';
 
 const App: React.FC = () => {
-  const [isLoggedIn, setIsLoggedIn] = useState<boolean>(false);
-
-  const handleConnectMagicLink = () => {
-    // Implement the logic for connecting with MagicLink
-    // When the user is successfully connected, set isLoggedIn to true
-    setIsLoggedIn(true);
-  };
 
   return (
     <Router>
