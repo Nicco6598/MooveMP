@@ -26,45 +26,47 @@ const MintNFT: React.FC = () => {
     };
 
     return (
-        <div className="flex justify-center items-center h-screen">
-            <div className="p-8 bg-white rounded-lg shadow-[0px_0px_15px_5px_#edf2f7] hover:shadow-[0px_0px_20px_10px_#e9d8fd] transition-all duration-300 ease-in-out transform hover:scale-105 max-w-md w-full">
-                <h1 className="mb-4 flex flex-col items-center pt-8 bg-gradient-to-r from-purple-500 to-sky-500 text-transparent bg-clip-text inline-block">MINT NFT</h1>
-                <input
-                    type="text"
-                    placeholder="Prezzo in ETH"
-                    value={price}
-                    onChange={e => setPrice(e.target.value)}
-                    className="border p-3 rounded-xl mb-4 w-full text-center"
-                />
-                <input
-                    type="text"
-                    placeholder="Rarità"
-                    value={rarity}
-                    onChange={e => setRarity(e.target.value)}
-                    className="border p-3 rounded-xl mb-4 w-full text-center"
-                />
-                <input
-                    type="text"
-                    placeholder="Scontistica"
-                    value={discount}
-                    onChange={e => setDiscount(e.target.value)}
-                    className="border p-3 rounded-xl mb-4 w-full text-center"
-                />
-                <input
-                    type="text"
-                    placeholder="Sconto su"
-                    value={discountOn}
-                    onChange={e => setDiscountOn(e.target.value)}
-                    className="border p-3 rounded-xl mb-4 w-full text-center"
-                />
-                <button
-                    onClick={handleMint}
-                    className="bg-purple-500 text-white p-3 rounded-xl text-center w-full hover:bg-emerald-500 transition-all duration-300 ease-in-out text-center"
-                >
-                    Mint
-                </button>
+        <div className="p-5">
+            <h1 className="mb-12 flex flex-col items-center pt-8 bg-gradient-to-r from-purple-500 to-sky-500 text-transparent bg-clip-text inline-block">MINT NFT</h1>
+                <div className="flex justify-center items-center">
+                    <div className="p-8 bg-white rounded-lg shadow-[0px_0px_15px_5px_#edf2f7] hover:shadow-[0px_0px_20px_10px_#e9d8fd] transition-all duration-300 ease-in-out transform hover:scale-105 max-w-md w-full">
+                        <input
+                            type="text"
+                            placeholder="Prezzo in ETH"
+                            value={price}
+                            onChange={e => setPrice(e.target.value)}
+                            className="border p-3 rounded-xl mb-4 w-full text-center"
+                        />
+                        <input
+                            type="text"
+                            placeholder="Rarità"
+                            value={rarity}
+                            onChange={e => setRarity(e.target.value)}
+                            className="border p-3 rounded-xl mb-4 w-full text-center"
+                        />
+                        <input
+                            type="text"
+                            placeholder="Scontistica"
+                            value={discount}
+                            onChange={e => setDiscount(e.target.value)}
+                            className="border p-3 rounded-xl mb-4 w-full text-center"
+                        />
+                        <input
+                            type="text"
+                            placeholder="Sconto su"
+                            value={discountOn}
+                            onChange={e => setDiscountOn(e.target.value)}
+                            className="border p-3 rounded-xl mb-4 w-full text-center"
+                        />
+                        <button
+                            onClick={handleMint}
+                            className="bg-purple-500 text-white p-3 rounded-xl text-center w-full hover:bg-emerald-500 transition-all duration-300 ease-in-out text-center"
+                        >
+                            Mint
+                        </button>
+                    </div>
+                </div>
             </div>
-        </div>
     );
 };
 
