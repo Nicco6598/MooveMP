@@ -14,7 +14,7 @@ const WalletBalance: React.FC<WalletBalanceProps> = ({ account }) => {
     if (provider && account) {
       // Accedi correttamente al provider per chiamare getBalance
       const balanceBigInt = await provider.getBalance(account);
-      const balanceInEth = parseFloat(ethers.utils.formatEther(balanceBigInt)).toFixed(5);
+      const balanceInEth = parseFloat(ethers.utils.formatEther(balanceBigInt)).toFixed(4);
       setBalance(balanceInEth);
     }
   };

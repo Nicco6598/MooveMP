@@ -52,7 +52,7 @@ const Marketplace: React.FC = () => {
 
     return (
         <div className="p-5">
-            <h1 className="mb-16 flex flex-col items-center pt-8">MARKETPLACE NFT</h1>
+            <h1 className="mb-12 flex flex-col items-center pt-8 bg-gradient-to-r from-purple-500 to-sky-500 text-transparent bg-clip-text inline-block">MARKETPLACE NFT</h1>
             <div className="grid grid-cols-1 gap-8 md:grid-cols-3 lg:grid-cols-4">
                 {nfts.map(nft => (
                     <div key={nft.tokenId} className="text-center bg-white rounded-lg shadow-[0px_0px_15px_5px_#edf2f7] hover:shadow-[0px_0px_15px_10px_#EBF4FF] transition-all duration-300 ease-in-out transform hover:scale-105 cursor-pointer p-4 mr-8 mt-4">
@@ -77,15 +77,15 @@ const Marketplace: React.FC = () => {
                             <span className="font-bold">{nft.discountOn}</span> 
                         </p>
                         {nft.isForSale && (
-                            <div className="flex justify-center space-x-4">
+                            <div className="flex justify-center space-x-4 mb-4">
                                 <button onClick={() => purchaseNFT(nft.tokenId, nft.price)} className="bg-purple-500 text-white p-2 rounded-lg hover:bg-purple-700 transition-colors duration-300 ease-in-out">
                                     Compra Ora
                                 </button>
-                                <Link to={`/nft/${nft.tokenId}`} className="bg-sky-500 text-white p-2 rounded-lg hover:bg-blue-700 transition-colors duration-300 ease-in-out">
-                                    Visualizza Dettagli
-                                </Link>
                             </div>
                         )}
+                        <Link to={`/nft/${nft.tokenId}`} className="bg-sky-500 text-white p-2 rounded-lg hover:bg-blue-700 transition-colors duration-300 ease-in-out">
+                                    Visualizza Dettagli
+                        </Link>
                     </div>
                 ))}
             </div>

@@ -89,7 +89,8 @@ const NFTDetails: React.FC = () => {
     };
 
     return (
-        <div className="flex justify-center items-center h-screen flex-col">
+        <div className="flex justify-center items-center mt-4 flex-col">
+            <h1 className="mb-12 flex flex-col items-center pt-8 bg-gradient-to-r from-purple-500 to-sky-500 text-transparent bg-clip-text inline-block">NFT DETAILS</h1>
             {details && (
                 <>
                     <div className="text-center bg-white rounded-lg shadow-[0px_0px_15px_5px_#edf2f7] hover:shadow-[0px_0px_15px_10px_#EBF4FF] transition-all duration-300 ease-in-out transform p-4 mb-8">
@@ -107,10 +108,10 @@ const NFTDetails: React.FC = () => {
                                     <p>
                                         <span className="font-bold">Owner:</span> {`${details.owner.slice(0, 7)}...${details.owner.slice(-5)}`}
                                     </p>
-                                    <p className="text-orange-600 font-bold mt-6 mb-6">
+                                    <p className="bg-gradient-to-r from-purple-500 to-sky-500 text-transparent bg-clip-text inline-block font-bold mt-6 mb-6">
                                         <span>Prezzo Attuale:</span> {ethers.utils.formatEther(details.price)} ETH
                                     </p>
-                                    <p  className="font-bold text-sky-600">
+                                    <p  className="font-bold text-red-500">
                                          <span>Durata Asta:</span> {details.auctionDuration > 0 ? formatDuration(details.auctionDuration) : 'Asta non attiva'}
                                     </p>
                                 </div>
@@ -155,7 +156,7 @@ const NFTDetails: React.FC = () => {
                             </div>
                         </div>
                     </div>
-                    <div className="text-center">
+                    <div className="text-center w-auto p-8 bg-sky-200 rounded-lg">
                         <div className="text-lg font-bold mb-2">Miglior Offerta:</div>
                         <div className="text-xl mb-2">{ethers.utils.formatEther(details.highestBid)} ETH</div>
                         <div className="text-lg font-bold mb-2">Miglior Offerente:</div>

@@ -28,7 +28,7 @@ const MintNFT: React.FC = () => {
     return (
         <div className="flex justify-center items-center h-screen">
             <div className="p-8 bg-white rounded-lg shadow-[0px_0px_15px_5px_#edf2f7] hover:shadow-[0px_0px_20px_10px_#e9d8fd] transition-all duration-300 ease-in-out transform hover:scale-105 max-w-md w-full">
-                <h1 className="mb-4 flex flex-col items-center pt-8">MINT NFT</h1>
+                <h1 className="mb-4 flex flex-col items-center pt-8 bg-gradient-to-r from-purple-500 to-sky-500 text-transparent bg-clip-text inline-block">MINT NFT</h1>
                 <input
                     type="text"
                     placeholder="Prezzo in ETH"
