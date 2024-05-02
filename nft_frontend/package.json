@@ -1,6 +1,6 @@
 {
   "name": "nft_frontend",
-  "version": "0.4.0",
+  "version": "0.5.0",
   "private": true,
   "dependencies": {
     "@openzeppelin/contracts": "^5.0.2",
@@ -12,6 +12,7 @@
     "@types/react": "^18.2.78",
     "@types/react-dom": "^18.2.25",
     "@types/web3": "^1.2.2",
+    "@walletconnect/web3-provider": "^1.8.0",
     "ethers": "^5.7.2",
     "ipfs-http-client": "^60.0.1",
     "magic-sdk": "^28.0.3",

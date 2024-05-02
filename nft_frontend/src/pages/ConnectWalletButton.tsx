@@ -38,13 +38,21 @@ const ConnectWalletButton = () => {
   };
 
   const disconnectWallet = async () => {
-    await web3Modal.clearCachedProvider();
-    resetApp();
+    try {
+      await web3Modal.clearCachedProvider();
+      resetApp();
+    } catch (error) {
+      console.error('Errore durante la disconnessione del wallet:', error);
+    }
   };
-
+  
   const resetApp = () => {
-    setProvider(null);
-    setAccount('');
+    try {
+      setProvider(null);
+      setAccount('');
+    } catch (error) {
+      console.error('Errore durante il reset dell\'applicazione:', error);
+    }
   };
 
   return (
