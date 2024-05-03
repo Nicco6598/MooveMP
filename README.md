@@ -166,4 +166,4 @@ Il frontend è sviluppato utilizzando le seguenti tecnologie:
 
 # Licenza
 
-Il codice sorgente è rilasciato sotto la licenza [MIT], che può essere consultata nel file `LICENSE` del repository.
+Questo progetto è rilasciato sotto la Licenza MIT. Per i dettagli completi, consulta il file [LICENSE](LICENSE).
