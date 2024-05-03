@@ -1,6 +1,6 @@
 # MooveMP
 
-Benvenuti al repository del TravelNFT Marketplace, una piattaforma innovativa sviluppata da Moove, dove gli utenti possono acquistare, vendere e scambiare NFT legati al tema dei viaggi.
+Benvenuti al repository del MooveMP, una piattaforma innovativa sviluppata da Moove, dove gli utenti possono acquistare, vendere e scambiare NFT legati al tema dei viaggi.
 
 ## Tecnologie Utilizzate
 
@@ -23,7 +23,7 @@ Prerequisiti: È necessario avere installato [Node.js](https://nodejs.org/), [np
 1. Clona il repository:
    ```bash
    git clone [https://github.com/Nicco6598/MooveMP.git]
-   cd [MooveMp]
+   cd MooveMp
    ```
 
 2. Installa le dipendenze:
@@ -43,12 +43,10 @@ Prerequisiti: È necessario avere installato [Node.js](https://nodejs.org/), [np
 
 5. Deploy dei contratti su Sepolia:
    ```bash
-   npx hardhat run scripts/deploy.js --network sepolia
+   npx hardhat run scripts/deploy.ts --network sepolia
    ```
 
-   Assicurati di aggiornare il file `hardhat.config.js` con le credenziali del tuo wallet e l'API key per [Infura](https://infura.io/) o un altro provider.
-
-## Uso del Marketplace
+### Uso del Marketplace
 
 Per avviare l'interfaccia utente:
 
@@ -64,14 +62,14 @@ Per avviare l'interfaccia utente:
 
 L'applicazione sarà disponibile all'indirizzo [http://localhost:3000](http://localhost:3000).
 
-## Smart Contract
+### Smart Contract
 
 Il contratto principale `MooveNFT.sol` gestisce la creazione e la vendita di NFT. Qui sotto trovi l'indirizzo del contratto su Sepolia e un esempio di un NFT:
 
 - Address: [0xFE95943310e47129CDC7eEb3722119C599C7a1Cb](https://sepolia.etherscan.io/address/0xFE95943310e47129CDC7eEb3722119C599C7a1Cb "Indirizzo del Contratto")
 - Esempio di NFT:
   - Token ID: 0
-  - Address Token: [0xfe95943310e47129cdc7eeb3722119c599c7a1cb/#0](https://sepolia.etherscan.io/nft/0xfe95943310e47129cdc7eeb3722119c599c7a1cb/0)
+  - Address Token: [0xfe95943310e47129cdc7eeb3722119c599c7a1cb/#0](https://sepolia.etherscan.io/nft/0xfe95943310e47129cdc7eeb3722119c599c7a1cb/0 "Indirizzo dell'NFT #0")
 
 ## Amministrazione
 
