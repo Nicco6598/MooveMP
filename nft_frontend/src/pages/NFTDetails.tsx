@@ -1,15 +1,18 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import { useParams } from 'react-router-dom';
 import { ethers } from 'ethers';
 import getContract from '../utils/getContract';
+import { ProviderContext } from './ProviderContext'; // Importa il contesto del provider
 
 interface NFTDetailsProps {
     tokenId: number;
     owner: string;
+    formattedOwner : string;
     price: ethers.BigNumber;
     auctionDuration: number;
     highestBid: ethers.BigNumber;
     highestBidder: string;
+    formattedHighestBidder: string; // Supponendo che formattedHighestBidder sia di tipo string
 }
 
 const NFTDetails: React.FC = () => {
@@ -17,6 +20,8 @@ const NFTDetails: React.FC = () => {
     const [details, setDetails] = useState<NFTDetailsProps | null>(null);
     const [newPrice, setNewPrice] = useState('');
     const [auctionDuration, setAuctionDuration] = useState('');
+    const [userAccount, setUserAccount] = useState<string | null>(null);
+    const { provider } = useContext(ProviderContext); // Ottieni il provider dal contesto
 
     const formatDuration = (durationInSeconds: number) => {
         const days = Math.floor(durationInSeconds / (24 * 3600));
@@ -29,8 +34,8 @@ const NFTDetails: React.FC = () => {
 
     useEffect(() => {
         const fetchData = async () => {
-            if (tokenId) {
-                const signer = new ethers.providers.Web3Provider(window.ethereum).getSigner();
+            if (provider && tokenId) { // Assicurati che il provider sia stato impostato e tokenId sia valido
+                const signer = provider.getSigner(); // Usa il provider ottenuto dal contesto
                 const contract = getContract(signer);
 
                 const owner = await contract.ownerOf(parseInt(tokenId));
@@ -38,6 +43,8 @@ const NFTDetails: React.FC = () => {
                 const highestBid = await contract.highestBid(parseInt(tokenId));
                 const highestBidder = await contract.highestBidder(parseInt(tokenId));
                 const isAuctionActive = await contract.auctionEnds(parseInt(tokenId)) > Date.now() / 1000;
+                const formattedHighestBidder = highestBidder.toLowerCase();
+                const formattedOwner = owner.toLowerCase();
 
                 let auctionDuration = 0;
                 if (isAuctionActive) {
@@ -47,16 +54,22 @@ const NFTDetails: React.FC = () => {
                 setDetails({
                     tokenId: parseInt(tokenId),
                     owner,
+                    formattedOwner,
                     price,
                     auctionDuration,
                     highestBid,
-                    highestBidder
+                    highestBidder,
+                    formattedHighestBidder,
                 });
+
+                // Richiedi l'account utente
+                const accounts = await window.ethereum.request({ method: 'eth_accounts' });
+                setUserAccount(accounts[0]);
             }
         };
 
         fetchData();
-    }, [tokenId]);
+    }, [provider, tokenId]);;
 
     const handleStartAuction = async () => {
         if (details && auctionDuration) {
@@ -85,6 +98,16 @@ const NFTDetails: React.FC = () => {
 
             await contract.bid(details.tokenId, { value: ethers.utils.parseEther(newPrice) });
             alert('Offerta effettuata con successo!');
+        }
+    };
+
+    const handleWithdrawRefund = async () => {
+        if (details && userAccount) {
+            const signer = new ethers.providers.Web3Provider(window.ethereum).getSigner();
+            const contract = getContract(signer);
+
+            await contract.withdrawRefund(details.tokenId);
+            alert('Rimborso ritirato con successo!');
         }
     };
 
@@ -117,7 +140,7 @@ const NFTDetails: React.FC = () => {
                                 <span>Durata Asta:</span> {details.auctionDuration > 0 ? formatDuration(details.auctionDuration) : 'Asta non attiva'}
                             </p>
                         </div>
-                        {details.auctionDuration > 0 && (
+                        {details.auctionDuration > 0 && details.formattedOwner !== userAccount && (
                             <div className="flex items-center mb-4">
                                 <input
                                     type="text"
@@ -126,10 +149,10 @@ const NFTDetails: React.FC = () => {
                                     onChange={e => setNewPrice(e.target.value)}
                                     className="border p-3 rounded-xl w-full"
                                 />
-                                <button onClick={handleBid} className="bg-purple-500 text-white p-3 w-full rounded-xl mt-2 hover:bg-purple-700 transition-colors duration-300">Bid</button>
+                                <button onClick={handleBid} className="bg-purple-500 text-white p-3 w-full rounded-xl hover:bg-purple-700 ml-4 transition-colors duration-300">Bid</button>
                             </div>
                         )}
-                        {details.auctionDuration === 0 && (
+                        {details.auctionDuration === 0 && details.formattedOwner === userAccount && (
                             <>
                                 <input
                                     type="text"
@@ -152,13 +175,19 @@ const NFTDetails: React.FC = () => {
                     </div>
                 </div>
             )}
-            {details && (
+            {details && details.formattedHighestBidder !== userAccount && details.auctionDuration > 0 && (
                 <div className="text-center w-full md:w-1/3 truncate p-4 md:p-8 bg-sky-200 rounded-lg mb-12">
                     <div className="text-lg font-bold mb-2">Miglior Offerta:</div>
                     <div className="text-xl truncate mb-2">{ethers.utils.formatEther(details.highestBid)} ETH</div>
-                    <div className={details.highestBidder === window.ethereum.selectedAddress ? 'text-red-500 font-bold' : 'text-blue-500 font-bold'}>
-                        {details.highestBidder === window.ethereum.selectedAddress ? 'Tu' : details.highestBidder}
-                    </div>
+                    <div className="text-red-500 font-bold">{details.highestBidder}</div>
+                    <button onClick={handleWithdrawRefund} className="bg-red-500 text-white p-3 rounded-xl w-full hover:bg-red-700 transition-colors duration-300 mt-4">RIMBORSA VECCHIA OFFERTA</button>
+                </div>
+            )}
+            {details && details.formattedHighestBidder === userAccount && (
+                <div className="text-center w-full md:w-1/3 truncate p-4 md:p-8 bg-sky-200 rounded-lg mb-12">
+                    <div className="text-lg font-bold mb-2">Miglior Offerta:</div>
+                    <div className="text-xl truncate mb-2">{ethers.utils.formatEther(details.highestBid)} ETH</div>
+                    <div className="text-green-500 font-bold">{details.highestBidder}</div>
                 </div>
             )}
         </div>
