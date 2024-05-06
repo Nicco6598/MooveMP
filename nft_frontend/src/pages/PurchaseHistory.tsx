@@ -26,26 +26,34 @@ const PurchaseHistory = () => {
                 const address = await signer.getAddress();
                 const purchaseHistory: PurchaseItem[] = [];
                 const statuses: string[] = [];
+                
                 for (let i = 0; i < tokenCount.toNumber(); i++) {
-                    const tokenHistory: PurchaseItem[] = await contract.getPurchaseHistory(i);
-                    for (const item of tokenHistory) {
-                        let status = "";
-                        if (address === item.buyer) {
-                            status = "COMPRATO";
-                        } else if (address === item.seller) {
-                            status = "VENDUTO";
+                    // Ottieni lo stato dell'asta
+                    const isAuctionActive = await contract.auctionEnds(i) > Date.now() / 1000;
+                    
+                    // Se l'asta per questo token non è attiva, aggiungi l'oggetto alla cronologia
+                    if (!isAuctionActive) {
+                        const tokenHistory: PurchaseItem[] = await contract.getPurchaseHistory(i);
+                        for (const item of tokenHistory) {
+                            let status = "";
+                            if (address === item.buyer) {
+                                status = "COMPRATO";
+                            } else if (address === item.seller) {
+                                status = "VENDUTO";
+                            }
+                            statuses.push(status);
+                            purchaseHistory.push({
+                                tokenId: i,
+                                buyer: item.buyer,
+                                seller: item.seller,
+                                price: item.price,
+                                timestamp: item.timestamp,
+                                status: status
+                            });
                         }
-                        statuses.push(status);
-                        purchaseHistory.push({
-                            tokenId: i,
-                            buyer: item.buyer,
-                            seller: item.seller,
-                            price: item.price,
-                            timestamp: item.timestamp,
-                            status: status
-                        });
                     }
                 }
+                
                 setHistory(purchaseHistory.map((item, index) => ({
                     ...item,
                     status: statuses[index]
@@ -56,7 +64,7 @@ const PurchaseHistory = () => {
                 setLoading(false);
             }
         };
-
+    
         fetchHistory();
     }, []);
 
