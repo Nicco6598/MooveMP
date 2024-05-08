@@ -7,7 +7,7 @@ const Navbar = () => {
   const [showMenu, setShowMenu] = useState(false);
 
   return (
-    <nav className="sticky top-4 z-10 bg-gradient-to-r from-purple-200 to-sky-200 rounded-b-2xl shadow-[0px_0px_10px_3px_#edf2f7]">
+    <nav className="sticky top-4 z-10 bg-gradient-to-r from-purple-200 to-sky-200 rounded-2xl shadow-[0px_0px_10px_3px_#edf2f7]">
       <div className="container mx-auto max-w-screen-xl transition-all duration-300 flex justify-between items-center p-4">
         <div className="flex items-center">
           <Link to="/"> {/* Aggiunto il link al logo */}
