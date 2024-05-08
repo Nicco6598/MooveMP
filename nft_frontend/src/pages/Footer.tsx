@@ -39,7 +39,7 @@ const Footer = () => {
         <div className="text-center md:ml-8">
           <h2 className="mb-4 md:mb-8 flex flex-col items-center mt-4 text-xl md:text-2xl font-bold bg-gradient-to-r from-purple-500 to-sky-500 text-transparent bg-clip-text inline-block">CONTATTI</h2>
           <a href="mailto:Assistenza_Moove@moove.com" className="text-lg md:text-lg font-semibold text-purple-600 hover:underline">Assistenza_Moove@moove.com</a>
-          <a href="tel:3900000000" className="block text-lg md:text-lg font-semibold text-purple-600 hover:underlinem mt-2">3900000000</a>
+          <a href="tel:3900000000" className="block text-lg md:text-lg font-semibold text-purple-600 hover:underline mt-2">3900000000</a>
           <h2 className="mb-4 md:mb-8 md:mt-8 mt-4 flex flex-col items-center mt-4 text-xl md:text-2xl font-bold bg-gradient-to-r from-purple-500 to-sky-500 text-transparent bg-clip-text inline-block">NEWSLETTER</h2>
           <form>
             <input
