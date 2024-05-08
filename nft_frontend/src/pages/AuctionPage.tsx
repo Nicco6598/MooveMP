@@ -73,7 +73,7 @@ const AuctionPage: React.FC = () => {
                         </p>
                         <p className="text-lg font-semibold text-gray-950 mb-2">Tempo rimanente:</p>
                         <p className="text-lg mb-4">
-                            <span className="font-bold text-red-500">
+                            <span className="font-bold text-xl bg-gradient-to-r from-amber-500 to-orange-500 text-transparent bg-clip-text inline-block">
                                 {calculateTimeRemaining(nft.auctionEnd)}
                             </span>
                         </p>

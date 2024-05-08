@@ -75,7 +75,7 @@ const Marketplace: React.FC = () => {
                             <span className="font-bold">{nft.discountOn}</span> 
                         </p>
                         <p className="text-xl mb-1">
-                            <span className="font-semibold text-xl bg-gradient-to-r from-amber-500 to-orange-500 text-transparent bg-clip-text inline-block mb-8">Prezzo: {ethers.utils.formatEther(nft.price)} ETH </span>
+                            <span className="font-bold text-xl bg-gradient-to-r from-amber-500 to-orange-500 text-transparent bg-clip-text inline-block mb-8">Prezzo: {ethers.utils.formatEther(nft.price)} ETH </span>
                         </p>
                         {nft.isForSale && (
                             <div className="flex justify-center space-x-4 mb-4">
