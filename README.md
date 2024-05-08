@@ -115,7 +115,7 @@ Dopo aver completato il deploy, è possibile interagire con il contratto attrave
 
 ## Frontend del Marketplace
 
-Il frontend del TravelNFT Marketplace è costruito con React e offre diverse pagine attraverso cui gli utenti possono interagire con i servizi offerti dalla piattaforma. Di seguito vengono descritte le principali pagine del sito e le loro funzionalità:
+Il frontend del MooveMP Marketplace è costruito con React e offre diverse pagine attraverso cui gli utenti possono interagire con i servizi offerti dalla piattaforma. Di seguito vengono descritte le principali pagine del sito e le loro funzionalità:
 
 ### Home Page
 
@@ -124,6 +124,14 @@ Il frontend del TravelNFT Marketplace è costruito con React e offre diverse pag
 - **Funzionalità principali**:
   - Visualizzazione degli NFT in evidenza.
   - Link rapido ai dettagli del singolo NFT.
+
+### Aste Live
+
+- **URL**: `/auctions`
+- **Descrizione**: La pagina Aste Live mostra tutti gli NFT attualmente in asta.
+- **Funzionalità principali**:
+  - Visualizzazione degli NFT in asta.
+  - Link rapido ai dettagli del singolo NFT per permettere di offrire una somma di ETH.
 
 ### Minting NFT
 
