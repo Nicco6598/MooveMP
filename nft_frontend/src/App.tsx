@@ -9,6 +9,7 @@ import NFTDetails from './pages/NFTDetails';
 import OwnedNFTs from './pages/OwnedNFTs';
 import PurchaseHistory from './pages/PurchaseHistory';
 import Footer from './pages/Footer';
+import AuctionPage from './pages/AuctionPage';
 
 const App: React.FC = () => {
 
@@ -23,6 +24,7 @@ const App: React.FC = () => {
             <Route path="/owned" element={<OwnedNFTs />} />
             <Route path="/nft/:tokenId" element={<NFTDetails />} />
             <Route path="/history" element={<PurchaseHistory />} />
+            <Route path="/auctions" element={<AuctionPage />} />
             <Route path="/" element={<Marketplace />} />  {/* Ensure this is the last Route if you want it to be the default */}
           </Routes>
           <Footer />
