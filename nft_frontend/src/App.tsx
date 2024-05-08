@@ -8,6 +8,7 @@ import MintNFT from './pages/MintNFT';
 import NFTDetails from './pages/NFTDetails';
 import OwnedNFTs from './pages/OwnedNFTs';
 import PurchaseHistory from './pages/PurchaseHistory';
+import Footer from './pages/Footer';
 
 const App: React.FC = () => {
 
@@ -24,6 +25,7 @@ const App: React.FC = () => {
             <Route path="/history" element={<PurchaseHistory />} />
             <Route path="/" element={<Marketplace />} />  {/* Ensure this is the last Route if you want it to be the default */}
           </Routes>
+          <Footer />
         </ProviderProvider>
       </div>
     </Router>
