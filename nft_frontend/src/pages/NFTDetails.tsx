@@ -7,7 +7,7 @@ import { ProviderContext } from './ProviderContext'; // Importa il contesto del 
 interface NFTDetailsProps {
     tokenId: number;
     owner: string;
-    formattedOwner : string;
+    formattedOwner: string;
     price: ethers.BigNumber;
     auctionDuration: number;
     highestBid: ethers.BigNumber;
@@ -34,80 +34,104 @@ const NFTDetails: React.FC = () => {
 
     useEffect(() => {
         const fetchData = async () => {
-            if (provider && tokenId) { // Assicurati che il provider sia stato impostato e tokenId sia valido
-                const signer = provider.getSigner(); // Usa il provider ottenuto dal contesto
-                const contract = getContract(signer);
+            try {
+                if (provider && tokenId) { // Assicurati che il provider sia stato impostato e tokenId sia valido
+                    const signer = provider.getSigner(); // Usa il provider ottenuto dal contesto
+                    const contract = getContract(signer);
 
-                const owner = await contract.ownerOf(parseInt(tokenId));
-                const price = await contract.getPrice(parseInt(tokenId));
-                const highestBid = await contract.highestBid(parseInt(tokenId));
-                const highestBidder = await contract.highestBidder(parseInt(tokenId));
-                const isAuctionActive = await contract.auctionEnds(parseInt(tokenId)) > Date.now() / 1000;
-                const formattedHighestBidder = highestBidder.toLowerCase();
-                const formattedOwner = owner.toLowerCase();
+                    const owner = await contract.ownerOf(parseInt(tokenId));
+                    const price = await contract.getPrice(parseInt(tokenId));
+                    const highestBid = await contract.highestBid(parseInt(tokenId));
+                    const highestBidder = await contract.highestBidder(parseInt(tokenId));
+                    const isAuctionActive = await contract.auctionEnds(parseInt(tokenId)) > Date.now() / 1000;
+                    const formattedHighestBidder = highestBidder.toLowerCase();
+                    const formattedOwner = owner.toLowerCase();
 
-                let auctionDuration = 0;
-                if (isAuctionActive) {
-                    auctionDuration = await contract.getAuctionDuration(parseInt(tokenId));
+                    let auctionDuration = 0;
+                    if (isAuctionActive) {
+                        auctionDuration = await contract.getAuctionDuration(parseInt(tokenId));
+                    }
+
+                    setDetails({
+                        tokenId: parseInt(tokenId),
+                        owner,
+                        formattedOwner,
+                        price,
+                        auctionDuration,
+                        highestBid,
+                        highestBidder,
+                        formattedHighestBidder,
+                    });
+
+                    // Richiedi l'account utente
+                    const accounts = await window.ethereum.request({ method: 'eth_accounts' });
+                    setUserAccount(accounts[0]);
                 }
-
-                setDetails({
-                    tokenId: parseInt(tokenId),
-                    owner,
-                    formattedOwner,
-                    price,
-                    auctionDuration,
-                    highestBid,
-                    highestBidder,
-                    formattedHighestBidder,
-                });
-
-                // Richiedi l'account utente
-                const accounts = await window.ethereum.request({ method: 'eth_accounts' });
-                setUserAccount(accounts[0]);
+            } catch (error) {
+                console.error('Errore durante il fetch dei dati:', error);
             }
         };
 
         fetchData();
-    }, [provider, tokenId]);;
+    }, [provider, tokenId]);
 
     const handleStartAuction = async () => {
-        if (details && auctionDuration) {
-            const signer = new ethers.providers.Web3Provider(window.ethereum).getSigner();
-            const contract = getContract(signer);
+        try {
+            if (details && auctionDuration) {
+                const signer = new ethers.providers.Web3Provider(window.ethereum).getSigner();
+                const contract = getContract(signer);
 
-            await contract.startAuction(details.tokenId, parseInt(auctionDuration));
-            alert('Asta iniziata con successo!');
+                await contract.startAuction(details.tokenId, parseInt(auctionDuration));
+                alert('Asta iniziata con successo!');
+            }
+        } catch (error) {
+            console.error('Errore durante l\'inizio dell\'asta:', error);
+            alert('Errore durante l\'inizio dell\'asta');
         }
     };
 
     const handleSetPrice = async () => {
-        if (details && newPrice) {
-            const signer = new ethers.providers.Web3Provider(window.ethereum).getSigner();
-            const contract = getContract(signer);
+        try {
+            if (details && newPrice) {
+                const signer = new ethers.providers.Web3Provider(window.ethereum).getSigner();
+                const contract = getContract(signer);
 
-            await contract.sale(details.tokenId, ethers.utils.parseEther(newPrice));
-            alert('Prezzo impostato con successo!');
+                await contract.sale(details.tokenId, ethers.utils.parseEther(newPrice));
+                alert('Prezzo impostato con successo!');
+            }
+        } catch (error) {
+            console.error('Errore durante l\'impostazione del prezzo:', error);
+            alert('Errore durante l\'impostazione del prezzo');
         }
     };
 
     const handleBid = async () => {
-        if (details && newPrice) {
-            const signer = new ethers.providers.Web3Provider(window.ethereum).getSigner();
-            const contract = getContract(signer);
+        try {
+            if (details && newPrice) {
+                const signer = new ethers.providers.Web3Provider(window.ethereum).getSigner();
+                const contract = getContract(signer);
 
-            await contract.bid(details.tokenId, { value: ethers.utils.parseEther(newPrice) });
-            alert('Offerta effettuata con successo!');
+                await contract.bid(details.tokenId, { value: ethers.utils.parseEther(newPrice) });
+                alert('Offerta effettuata con successo!');
+            }
+        } catch (error) {
+            console.error('Errore durante l\'offerta:', error);
+            alert('Errore durante l\'offerta');
         }
     };
 
     const handleWithdrawRefund = async () => {
-        if (details && userAccount) {
-            const signer = new ethers.providers.Web3Provider(window.ethereum).getSigner();
-            const contract = getContract(signer);
+        try {
+            if (details && userAccount) {
+                const signer = new ethers.providers.Web3Provider(window.ethereum).getSigner();
+                const contract = getContract(signer);
 
-            await contract.withdrawRefund(details.tokenId);
-            alert('Rimborso ritirato con successo!');
+                await contract.withdrawRefund(details.tokenId);
+                alert('Rimborso ritirato con successo!');
+            }
+        } catch (error) {
+            console.error('Errore durante il ritiro del rimborso:', error);
+            alert('Errore durante il ritiro del rimborso');
         }
     };
 
