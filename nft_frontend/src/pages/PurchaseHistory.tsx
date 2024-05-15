@@ -11,6 +11,29 @@ interface PurchaseItem {
     status: string;
 }
 
+const NFTCard: React.FC<PurchaseItem> = ({ tokenId, buyer, seller, price, timestamp, status }) => {
+    return (
+        <div className="bg-white rounded-lg shadow-[0px_0px_15px_5px_#edf2f7] hover:shadow-[0px_0px_15px_10px_#EBF4FF] transition-all duration-300 ease-in-out transform hover:scale-105 p-4">
+            <p className={`text-sm font-bold bg-gradient-to-r ${status === "COMPRATO" ? "from-green-500 to-teal-500" : "from-amber-500 to-red-500"} text-transparent bg-clip-text inline-block truncate`}>
+                {new Date(timestamp * 1000).toLocaleDateString()}
+            </p>
+            <p className={`text-xl font-bold bg-gradient-to-r ${status === "COMPRATO" ? "from-green-500 to-teal-500" : "from-amber-500 to-red-500"} text-transparent bg-clip-text inline-block truncate`}>
+                {status}
+            </p>
+            <p className={`text-lg font-bold bg-gradient-to-r ${status === "COMPRATO" ? "from-green-500 to-teal-500" : "from-amber-500 to-red-500"} text-transparent mb-2 bg-clip-text inline-block truncate`}>
+                {ethers.utils.formatEther(price)} ETH
+            </p>
+            <p className="text-gray-700 text-sm font-bold mb-1 truncate">Token ID: {tokenId}</p>
+            <p className="text-gray-700 text-sm font-semibold mb-1 truncate">
+                Buyer: <a href={`https://sepolia.etherscan.io/address/${buyer}`} target="_blank" rel="noopener noreferrer" className="text-sky-500 hover:underline">{buyer}</a>
+            </p>
+            <p className="text-gray-700 text-sm font-semibold mb-4 truncate">
+                Seller: <a href={`https://sepolia.etherscan.io/address/${seller}`} target="_blank" rel="noopener noreferrer" className="text-sky-500 hover:underline">{seller}</a>
+            </p>
+        </div>
+    );
+};
+
 const PurchaseHistory = () => {
     const [history, setHistory] = useState<PurchaseItem[]>([]);
     const [loading, setLoading] = useState(true);
@@ -19,7 +42,6 @@ const PurchaseHistory = () => {
 
     useEffect(() => {
         const fetchHistory = async () => {
-            const provider = new ethers.providers.Web3Provider(window.ethereum);
             const contract = getContract(provider);
             try {
                 const tokenCount: ethers.BigNumber = await contract.nextTokenId();
@@ -66,7 +88,7 @@ const PurchaseHistory = () => {
         };
     
         fetchHistory();
-    }, []);
+    }, [provider, signer]);
 
     if (loading) return <p className="mt-16 flex flex-col items-center pt-8">Loading...</p>;
 
@@ -77,20 +99,7 @@ const PurchaseHistory = () => {
             {history
                 .sort((a, b) => b.timestamp - a.timestamp)
                 .map((item, index) => (
-                    <div key={index} className="bg-white rounded-lg shadow-[0px_0px_15px_5px_#edf2f7] hover:shadow-[0px_0px_15px_10px_#EBF4FF] transition-all duration-300 ease-in-out transform hover:scale-105 p-4">
-                        <p className={`text-sm font-bold bg-gradient-to-r ${item.status === "COMPRATO" ? "from-green-500 to-teal-500" : "from-amber-500 to-red-500"} text-transparent bg-clip-text inline-block truncate`}>{new Date(item.timestamp * 1000).toLocaleDateString()}</p>
-                        <p></p>
-                        <p className={`text-xl font-bold bg-gradient-to-r ${item.status === "COMPRATO" ? "from-green-500 to-teal-500" : "from-amber-500 to-red-500"} text-transparent bg-clip-text inline-block truncate`}>{item.status}</p>
-                        <p></p>
-                        <p className={`text-lg font-bold bg-gradient-to-r ${item.status === "COMPRATO" ? "from-green-500 to-teal-500" : "from-amber-500 to-red-500"} text-transparent mb-2 bg-clip-text inline-block truncate`}>{ethers.utils.formatEther(item.price)} ETH</p>
-                        <p className="text-gray-700 text-sm font-bold mb-1 truncate">Token ID: {item.tokenId}</p>
-                        <p className="text-gray-700 text-sm font-semibold mb-1 truncate">
-                            Buyer: <a href={`https://sepolia.etherscan.io/address/${item.buyer}`} target="_blank" rel="noopener noreferrer" className="text-sky-500 hover:underline">{item.buyer}</a>
-                        </p>
-                        <p className="text-gray-700 text-sm font-semibold mb-4 truncate">
-                            Seller: <a href={`https://sepolia.etherscan.io/address/${item.seller}`} target="_blank" rel="noopener noreferrer" className="text-sky-500 hover:underline">{item.seller}</a>
-                        </p>
-                    </div>
+                    <NFTCard key={index} {...item} />
                 ))}
             </div>
         </div>
