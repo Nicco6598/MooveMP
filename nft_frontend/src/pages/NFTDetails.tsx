@@ -21,6 +21,7 @@ const NFTDetails: React.FC = () => {
     const [newPrice, setNewPrice] = useState('');
     const [auctionDuration, setAuctionDuration] = useState('');
     const [userAccount, setUserAccount] = useState<string | null>(null);
+    const [loading, setLoading] = useState(false); // Stato per gestire il messaggio di attesa
     const { provider } = useContext(ProviderContext); // Ottieni il provider dal contesto
 
     const formatDuration = (durationInSeconds: number) => {
@@ -43,7 +44,8 @@ const NFTDetails: React.FC = () => {
                     const price = await contract.getPrice(parseInt(tokenId));
                     const highestBid = await contract.highestBid(parseInt(tokenId));
                     const highestBidder = await contract.highestBidder(parseInt(tokenId));
-                    const isAuctionActive = await contract.auctionEnds(parseInt(tokenId)) > Date.now() / 1000;
+                    const auctionEnd = await contract.auctionEnds(parseInt(tokenId));
+                    const isAuctionActive = auctionEnd > Date.now() / 1000;
                     const formattedHighestBidder = highestBidder.toLowerCase();
                     const formattedOwner = owner.toLowerCase();
 
@@ -78,13 +80,21 @@ const NFTDetails: React.FC = () => {
     const handleStartAuction = async () => {
         try {
             if (details && auctionDuration) {
+                setLoading(true);
                 const signer = new ethers.providers.Web3Provider(window.ethereum).getSigner();
                 const contract = getContract(signer);
 
-                await contract.startAuction(details.tokenId, parseInt(auctionDuration));
-                alert('Asta iniziata con successo!');
+                // Resetta highestBidder e highestBid nel frontend
+                details.highestBidder = ethers.constants.AddressZero;
+                details.highestBid = ethers.BigNumber.from(0);
+
+                const tx = await contract.startAuction(details.tokenId, parseInt(auctionDuration));
+                await tx.wait();
+                setLoading(false);
+                alert('Asta iniziata con successo e migliori offerte resettate!');
             }
         } catch (error) {
+            setLoading(false);
             console.error('Errore durante l\'inizio dell\'asta:', error);
             alert('Errore durante l\'inizio dell\'asta');
         }
@@ -93,13 +103,21 @@ const NFTDetails: React.FC = () => {
     const handleSetPrice = async () => {
         try {
             if (details && newPrice) {
+                setLoading(true);
                 const signer = new ethers.providers.Web3Provider(window.ethereum).getSigner();
                 const contract = getContract(signer);
 
-                await contract.sale(details.tokenId, ethers.utils.parseEther(newPrice));
-                alert('Prezzo impostato con successo!');
+                // Resetta highestBidder e highestBid nel frontend
+                details.highestBidder = ethers.constants.AddressZero;
+                details.highestBid = ethers.BigNumber.from(0);
+
+                const tx = await contract.sale(details.tokenId, ethers.utils.parseEther(newPrice));
+                await tx.wait();
+                setLoading(false);
+                alert('Prezzo impostato con successo e migliori offerte resettate!');
             }
         } catch (error) {
+            setLoading(false);
             console.error('Errore durante l\'impostazione del prezzo:', error);
             alert('Errore durante l\'impostazione del prezzo');
         }
@@ -108,13 +126,17 @@ const NFTDetails: React.FC = () => {
     const handleBid = async () => {
         try {
             if (details && newPrice) {
+                setLoading(true);
                 const signer = new ethers.providers.Web3Provider(window.ethereum).getSigner();
                 const contract = getContract(signer);
 
-                await contract.bid(details.tokenId, { value: ethers.utils.parseEther(newPrice) });
+                const tx = await contract.bid(details.tokenId, { value: ethers.utils.parseEther(newPrice) });
+                await tx.wait();
+                setLoading(false);
                 alert('Offerta effettuata con successo!');
             }
         } catch (error) {
+            setLoading(false);
             console.error('Errore durante l\'offerta:', error);
             alert('Errore durante l\'offerta');
         }
@@ -123,20 +145,51 @@ const NFTDetails: React.FC = () => {
     const handleWithdrawRefund = async () => {
         try {
             if (details && userAccount) {
+                setLoading(true);
                 const signer = new ethers.providers.Web3Provider(window.ethereum).getSigner();
                 const contract = getContract(signer);
 
-                await contract.withdrawRefund(details.tokenId);
+                const tx = await contract.withdrawRefund(details.tokenId);
+                await tx.wait();
+                setLoading(false);
                 alert('Rimborso ritirato con successo!');
             }
         } catch (error) {
+            setLoading(false);
             console.error('Errore durante il ritiro del rimborso:', error);
             alert('Errore durante il ritiro del rimborso');
         }
     };
 
+    const handleRedeemNFT = async () => {
+        try {
+            if (details && userAccount) {
+                setLoading(true);
+                const signer = new ethers.providers.Web3Provider(window.ethereum).getSigner();
+                const contract = getContract(signer);
+
+                const tx = await contract.redeemNFT(details.tokenId);
+                await tx.wait();
+                setLoading(false);
+                alert('NFT riscattato con successo!');
+            }
+        } catch (error) {
+            setLoading(false);
+            console.error('Errore durante il riscatto dell\'NFT:', error);
+            alert('Errore durante il riscatto dell\'NFT');
+        }
+    };
+
     return (
-        <div className="flex justify-center items-center mt-4 flex-col">
+        <div className="relative flex justify-center items-center mt-4 flex-col">
+            {loading && (
+                <div className="fixed inset-0 flex items-center justify-center bg-purple-200 bg-opacity-55 backdrop-blur z-50">
+                    <div className="bg-white p-6 rounded-lg border border-black shadow-[0px_0px_15px_5px_#0f0f0f] flex flex-col items-center">
+                        <p className="text-xl text-purple-500 font-bold mb-4">Attendi la conferma del tx...</p>
+                        <img src="https://i.gifer.com/yy3.gif" alt="Loading..." className="h-20 w-20" />
+                    </div>
+                </div>
+            )}
             <h1 className="mb-6 flex flex-col items-center pt-8 bg-gradient-to-r from-purple-500 to-sky-500 text-transparent bg-clip-text inline-block text-2xl">NFT DETAILS</h1>
             {details && (
                 <div className="text-center bg-white rounded-lg shadow-[0px_0px_15px_5px_#edf2f7] hover:shadow-[0px_0px_15px_10px_#EBF4FF] transition-all duration-300 ease-in-out transform p-4 mb-8 flex flex-wrap">
@@ -212,6 +265,9 @@ const NFTDetails: React.FC = () => {
                     <div className="text-lg font-bold mb-2">Miglior Offerta:</div>
                     <div className="text-xl truncate mb-2">{ethers.utils.formatEther(details.highestBid)} ETH</div>
                     <div className="text-green-500 font-bold">{details.highestBidder}</div>
+                    {details.auctionDuration === 0 && (
+                        <button onClick={handleRedeemNFT} className="bg-green-500 text-white p-3 rounded-xl w-full hover:bg-green-700 transition-colors duration-300 mt-4">RISCUOTI NFT</button>
+                    )}
                 </div>
             )}
         </div>
