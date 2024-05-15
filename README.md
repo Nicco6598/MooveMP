@@ -11,7 +11,7 @@ Benvenuti al repository del MooveMP, una piattaforma innovativa sviluppata da Mo
 
 ## Struttura del Progetto
 
-- `contracts/`: Contiene i contratti intelligenti del marketplace.
+- `contracts/`: Contiene gli Smart Contract del marketplace.
 - `artifacts/`: Contiene il JSON Abi per richiamare le funzioni del contratto.
 - `nft_frontend/`: Codice sorgente dell'interfaccia utente, costruita con React.
 - `test/`: Test per i contratti intelligenti utilizzando Hardhat.
@@ -55,6 +55,11 @@ Per avviare l'interfaccia utente:
    cd nft_frontend
    ```
 
+1. Installa le dipendenze del frontend
+   ```bash
+   npm install
+   ```
+
 2. Avvia l'applicazione React:
    ```bash
    npm start
@@ -79,9 +84,17 @@ Per effettuare il deploy del contratto e quindi diventare l'Admin Moove (l'entit
 
 ### Utilizzo di Hardhat
 
+1. Installa dotenv per la gestione del file .env:
+   ```bash
+   npm install dotenv
+   ```
+
 1. **Configurazione del progetto**:
-   - Assicurati di avere un file `.env` nella root del tuo progetto Hardhat che contiene le chiavi private del tuo wallet e l'API key per un provider come Infura. Questo permetterà di interagire con la blockchain.
-   - Aggiorna il file `hardhat.config.ts` per includere le configurazioni della rete Sepolia, facendo riferimento alle credenziali nel file `.env`.
+   - Assicurati di avere un file `.env` nella root del tuo progetto Hardhat che contiene le chiavi private del tuo wallet e l'API key per un provider come Infura, questo permetterà di interagire con la blockchain (trovi il file .env.example come template nella root del progetto).
+   - Aggiorna il file `hardhat.config.ts` per includere le configurazioni della rete Sepolia, facendo riferimento alle credenziali nel file `.env` come riportato di seguito, aggiungilo sotto gli altri import.
+   ```ts
+   import * as dotenv from 'dotenv'; // Importa dotenv
+   ```
 
 2. **Deploy**:
    - Crea una folder scripts con all'interno un file deploy.ts (`scripts/deploy.ts`) (puoi tranquillamente generarlo con qualsiasi chatbot AI oppure cercarlo su Guthub/   Stackoverflow), poi eseguilo utilizzando il comando:

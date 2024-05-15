@@ -21,8 +21,8 @@ const config: HardhatUserConfig = {
       // Configuration specific to the hardhat network
       chainId: 1337 // Standard chain ID for local Hardhat network
     },
-    rinkeby: {
-      url: process.env.RINKEBY_URL || "",
+    sepolia: {
+      url: process.env.SEPOLIA_URL || "",
       accounts: process.env.PRIVATE_KEY ? [process.env.PRIVATE_KEY] : []
     },
     // You can define other networks here as needed.
