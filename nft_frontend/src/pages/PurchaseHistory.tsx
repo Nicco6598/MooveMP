@@ -17,9 +17,11 @@ const NFTCard: React.FC<PurchaseItem> = ({ tokenId, buyer, seller, price, timest
             <p className={`text-sm font-bold bg-gradient-to-r ${status === "COMPRATO" ? "from-green-500 to-teal-500" : "from-amber-500 to-red-500"} text-transparent bg-clip-text inline-block truncate`}>
                 {new Date(timestamp * 1000).toLocaleDateString()}
             </p>
+            <p></p>
             <p className={`text-xl font-bold bg-gradient-to-r ${status === "COMPRATO" ? "from-green-500 to-teal-500" : "from-amber-500 to-red-500"} text-transparent bg-clip-text inline-block truncate`}>
                 {status}
             </p>
+            <p></p>
             <p className={`text-lg font-bold bg-gradient-to-r ${status === "COMPRATO" ? "from-green-500 to-teal-500" : "from-amber-500 to-red-500"} text-transparent mb-2 bg-clip-text inline-block truncate`}>
                 {ethers.utils.formatEther(price)} ETH
             </p>
