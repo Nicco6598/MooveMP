@@ -28,7 +28,7 @@ Prerequisiti: È necessario avere installato [Node.js](https://nodejs.org/), [np
 
 2. Installa le dipendenze:
    ```bash
-   npm install
+   npm install --legacy-peer-deps
    ```
 
 3. Compila i contratti:
