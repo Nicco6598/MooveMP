@@ -7,10 +7,33 @@ const MintNFT: React.FC = () => {
     const [rarity, setRarity] = useState('');
     const [discount, setDiscount] = useState('');
     const [discountOn, setDiscountOn] = useState('');
+    const [errors, setErrors] = useState<string[]>([]);
     const signer = new ethers.providers.Web3Provider(window.ethereum).getSigner();
-    const [loading, setLoading] = useState(false); // Stato per gestire il messaggio di attesa
+    const [loading, setLoading] = useState(false);
+
+    const validateForm = () => {
+        const errors = [];
+        if (isNaN(parseFloat(price)) || parseFloat(price) <= 0) {
+            errors.push('Il prezzo deve essere un numero valido maggiore di 0');
+        }
+        if (!rarity.trim()) {
+            errors.push('La rarità è obbligatoria');
+        }
+        if (!discount.trim()) {
+            errors.push('La scontistica è obbligatoria');
+        }
+        if (!discountOn.trim()) {
+            errors.push('Il campo "Sconto su" è obbligatorio');
+        }
+        setErrors(errors);
+        return errors.length === 0;
+    };
 
     const handleMint = async () => {
+        if (!validateForm()) {
+            return;
+        }
+
         setLoading(true);
         const contract = getContract(signer);
         try {
@@ -41,45 +64,52 @@ const MintNFT: React.FC = () => {
                 </div>
             )}
             <h1 className="mb-12 flex flex-col items-center pt-8 bg-gradient-to-r from-purple-500 to-sky-500 text-transparent bg-clip-text inline-block">MINT NFT</h1>
-                <div className="flex justify-center items-center">
-                    <div className="p-8 bg-white rounded-lg shadow-[0px_0px_15px_5px_#edf2f7] hover:shadow-[0px_0px_20px_10px_#e9d8fd] transition-all duration-300 ease-in-out transform hover:scale-105 max-w-md w-full">
-                        <input
-                            type="text"
-                            placeholder="Prezzo in ETH"
-                            value={price}
-                            onChange={e => setPrice(e.target.value)}
-                            className="border p-3 rounded-xl mb-4 w-full text-center"
-                        />
-                        <input
-                            type="text"
-                            placeholder="Rarità"
-                            value={rarity}
-                            onChange={e => setRarity(e.target.value)}
-                            className="border p-3 rounded-xl mb-4 w-full text-center"
-                        />
-                        <input
-                            type="text"
-                            placeholder="Scontistica"
-                            value={discount}
-                            onChange={e => setDiscount(e.target.value)}
-                            className="border p-3 rounded-xl mb-4 w-full text-center"
-                        />
-                        <input
-                            type="text"
-                            placeholder="Sconto su"
-                            value={discountOn}
-                            onChange={e => setDiscountOn(e.target.value)}
-                            className="border p-3 rounded-xl mb-4 w-full text-center"
-                        />
-                        <button
-                            onClick={handleMint}
-                            className="bg-purple-500 text-white p-3 rounded-xl text-center w-full hover:bg-emerald-500 transition-all duration-300 ease-in-out text-center"
-                        >
-                            Mint
-                        </button>
-                    </div>
+            <div className="flex justify-center items-center">
+                <div className="p-8 bg-white rounded-lg shadow-[0px_0px_15px_5px_#edf2f7] max-w-md w-full">
+                    {errors.length > 0 && (
+                        <div className="mb-4">
+                            {errors.map((error, index) => (
+                                <p key={index} className="text-red-500 text-sm">{error}</p>
+                            ))}
+                        </div>
+                    )}
+                    <input
+                        type="text"
+                        placeholder="Prezzo in ETH"
+                        value={price}
+                        onChange={e => setPrice(e.target.value)}
+                        className="border p-3 rounded-xl mb-4 w-full text-center"
+                    />
+                    <input
+                        type="text"
+                        placeholder="Rarità"
+                        value={rarity}
+                        onChange={e => setRarity(e.target.value)}
+                        className="border p-3 rounded-xl mb-4 w-full text-center"
+                    />
+                    <input
+                        type="text"
+                        placeholder="Scontistica"
+                        value={discount}
+                        onChange={e => setDiscount(e.target.value)}
+                        className="border p-3 rounded-xl mb-4 w-full text-center"
+                    />
+                    <input
+                        type="text"
+                        placeholder="Sconto su"
+                        value={discountOn}
+                        onChange={e => setDiscountOn(e.target.value)}
+                        className="border p-3 rounded-xl mb-4 w-full text-center"
+                    />
+                    <button
+                        onClick={handleMint}
+                        className="bg-purple-500 text-white p-3 rounded-xl text-center w-full hover:bg-emerald-500 transition-all duration-300 ease-in-out text-center"
+                    >
+                        Mint
+                    </button>
                 </div>
             </div>
+        </div>
     );
 };
 

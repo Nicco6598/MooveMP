@@ -7,9 +7,9 @@ const Navbar = () => {
   const [showMenu, setShowMenu] = useState(false);
 
   const menuItems = [
-    { path: '/history', title: 'Transaction History' },
-    { path: '/owned', title: 'My NFTs' },
-    { path: '/auctions', title: 'Live Auctions' },
+    { path: '/history', title: 'Transazioni' },
+    { path: '/owned', title: 'Miei NFT' },
+    { path: '/auctions', title: 'Aste Live' },
     { path: '/mint', title: 'Mint NFT', special: true }
   ];
 
