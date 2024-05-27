@@ -1,6 +1,7 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useContext } from 'react';
 import { ethers } from 'ethers';
 import getContract from '../utils/getContract';
+import { ProviderContext } from './ProviderContext';
 
 interface PurchaseItem {
     tokenId: number;
@@ -39,11 +40,13 @@ const NFTCard: React.FC<PurchaseItem> = ({ tokenId, buyer, seller, price, timest
 const PurchaseHistory = () => {
     const [history, setHistory] = useState<PurchaseItem[]>([]);
     const [loading, setLoading] = useState(true);
-    const provider = new ethers.providers.Web3Provider(window.ethereum);
-    const signer = provider.getSigner();
+    const { provider } = useContext(ProviderContext);
+    const signer = provider?.getSigner();
 
     useEffect(() => {
         const fetchHistory = async () => {
+            if (!signer || !provider) return;
+
             const contract = getContract(provider);
             try {
                 const tokenCount: ethers.BigNumber = await contract.nextTokenId();
@@ -65,15 +68,17 @@ const PurchaseHistory = () => {
                             } else if (address === item.seller) {
                                 status = "VENDUTO";
                             }
-                            statuses.push(status);
-                            purchaseHistory.push({
-                                tokenId: i,
-                                buyer: item.buyer,
-                                seller: item.seller,
-                                price: item.price,
-                                timestamp: item.timestamp,
-                                status: status
-                            });
+                            if (status) {
+                                statuses.push(status);
+                                purchaseHistory.push({
+                                    tokenId: i,
+                                    buyer: item.buyer,
+                                    seller: item.seller,
+                                    price: item.price,
+                                    timestamp: item.timestamp,
+                                    status: status
+                                });
+                            }
                         }
                     }
                 }
@@ -96,7 +101,7 @@ const PurchaseHistory = () => {
 
     return (
         <div className="flex justify-center items-center mt-4 mb-12 flex-col">
-            <h1 className="mb-12 flex flex-col items-center pt-8 bg-gradient-to-r from-purple-500 to-sky-500 text-transparent bg-clip-text inline-block">PURCHASE HISTORY</h1>
+            <h1 className="mb-12 flex flex-col items-center pt-8 bg-gradient-to-r from-purple-500 to-sky-500 text-transparent bg-clip-text inline-block">CRONOLOGIA TRANSAZIONI</h1>
             <div className="grid flex flex-col items-center grid-cols-1 gap-8 mt-5 w-auto max-w-3xl">
             {history
                 .sort((a, b) => b.timestamp - a.timestamp)

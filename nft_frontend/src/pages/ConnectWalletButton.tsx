@@ -1,4 +1,4 @@
-import React, { useState, useContext } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import Web3Modal from 'web3modal';
 import { ethers } from 'ethers';
 import WalletBalance from './WalletBalance';
@@ -55,6 +55,12 @@ const ConnectWalletButton = () => {
     }
   };
 
+  useEffect(() => {
+    if (web3Modal.cachedProvider) {
+      connectWallet();
+    }
+  }, []);
+
   return (
     <div className="flex items-center transition-all">
       {account ? (
@@ -65,7 +71,7 @@ const ConnectWalletButton = () => {
         </div>
       ) : (
         <button onClick={connectWallet} className="bg-blue-600 text-white py-2 px-4 rounded-2xl shadow-lg hover:shadow-2xl hover:bg-blue-700 transition-all duration-300 ease-in-out transform hover:scale-105">
-          Connect Wallet
+          Connetti Wallet
         </button>
       )}
     </div>

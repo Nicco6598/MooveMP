@@ -14,7 +14,7 @@ Benvenuti al repository del MooveMP, una piattaforma innovativa sviluppata da Mo
 - `contracts/`: Contiene gli Smart Contract del marketplace.
 - `artifacts/`: Contiene il JSON Abi per richiamare le funzioni del contratto.
 - `nft_frontend/`: Codice sorgente dell'interfaccia utente, costruita con React.
-- `test/`: Test per i contratti intelligenti utilizzando Hardhat.
+- `test/`: Test per gli Smart Contract utilizzando Hardhat.
 
 ## Setup Iniziale
 
@@ -31,17 +31,17 @@ Prerequisiti: È necessario avere installato [Node.js](https://nodejs.org/), [np
    npm install --legacy-peer-deps
    ```
 
-3. Compila i contratti:
+3. Compila gli smart contract:
    ```bash
    npx hardhat compile
    ```
 
-4. Lancia i test dei contratti:
+4. Lancia i test degli smart contract:
    ```bash
    npx hardhat test
    ```
 
-5. Deploy dei contratti su Sepolia:
+5. Deploy degli smart contract su Sepolia:
    ```bash
    npx hardhat run scripts/deploy.ts --network sepolia
    ```
