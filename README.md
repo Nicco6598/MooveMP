@@ -12,7 +12,7 @@ Benvenuti al repository del MooveMP, una piattaforma innovativa sviluppata da Mo
 ## Struttura del Progetto
 
 - `contracts/`: Contiene gli Smart Contract del marketplace.
-- `artifacts/`: Contiene il JSON Abi per richiamare le funzioni del contratto.
+- `artifacts/`: Contiene il JSON Abi per richiamare le funzioni dello smart contract.
 - `nft_frontend/`: Codice sorgente dell'interfaccia utente, costruita con React.
 - `test/`: Test per gli Smart Contract utilizzando Hardhat.
 
@@ -69,18 +69,18 @@ L'applicazione sarà disponibile all'indirizzo [http://localhost:3000](http://lo
 
 ### Smart Contract
 
-Il contratto principale `MooveNFT.sol` gestisce la creazione e la vendita di NFT. Qui sotto trovi l'indirizzo del contratto su Sepolia e un esempio di un NFT:
+Lo smart contract principale `MooveNFT.sol` gestisce la creazione e la vendita di NFT. Qui sotto trovi l'indirizzo dello smart contract su Sepolia e un esempio di un NFT:
 
-- Address: [0xFE95943310e47129CDC7eEb3722119C599C7a1Cb](https://sepolia.etherscan.io/address/0xFE95943310e47129CDC7eEb3722119C599C7a1Cb "Indirizzo del Contratto")
+- Address: [0xFE95943310e47129CDC7eEb3722119C599C7a1Cb](https://sepolia.etherscan.io/address/0xFE95943310e47129CDC7eEb3722119C599C7a1Cb "Indirizzo dello smart contract")
 - Esempio di NFT:
   - Token ID: 0
   - Address Token: [0xfe95943310e47129cdc7eeb3722119c599c7a1cb/#0](https://sepolia.etherscan.io/nft/0xfe95943310e47129cdc7eeb3722119c599c7a1cb/0 "Indirizzo dell'NFT #0")
 
 ## Amministrazione
 
-### Deploy del Contratto e Configurazione dell'Admin Moove
+### Deploy dello Smart Contract e Configurazione dell'Admin Moove
 
-Per effettuare il deploy del contratto e quindi diventare l'Admin Moove (l'entità che ha il permesso di mintare NFT), segui queste istruzioni:
+Per effettuare il deploy dello smart contract e quindi diventare l'Admin Moove (l'entità che ha il permesso di mintare NFT), segui queste istruzioni:
 
 ### Utilizzo di Hardhat
 
@@ -97,14 +97,15 @@ Per effettuare il deploy del contratto e quindi diventare l'Admin Moove (l'entit
    ```
 
 2. **Deploy**:
-   - Crea una folder scripts con all'interno un file deploy.ts (`scripts/deploy.ts`) (puoi tranquillamente generarlo con qualsiasi chatbot AI oppure cercarlo su Guthub/   Stackoverflow), poi eseguilo utilizzando il comando:
+   - Modifica il file template `deploy.ts` (contenuto nella cartella `MooveMP/scripts`) con i parametri corretti per il tuo progetto.
+   - Esegui il comando da terminale:
      ```bash
      npx hardhat run scripts/deploy.ts --network sepolia
      ```
-   - Al termine del deploy, lo script stamperà l'indirizzo del contratto deployato. Assicurati di annotarlo.
+   - Al termine del deploy, lo script stamperà l'indirizzo dello smart contract deployato. Assicurati di annotarlo.
 
 3. **Diventare Admin Moove**:
-   - Una volta effettuato il deploy sarai automaticamente l'admin di Moove che potrà mintare gli NFT (Ovvero l'*OWNER* del contratto).
+   - Una volta effettuato il deploy sarai automaticamente l'admin di Moove che potrà mintare gli NFT (Ovvero l'*OWNER* dello smart contract).
 
 ### Utilizzo di Remix con Injected Web3 Provider
 
@@ -112,18 +113,18 @@ Per effettuare il deploy del contratto e quindi diventare l'Admin Moove (l'entit
    - Connettiti a Remix utilizzando un browser compatibile con un wallet come MetaMask.
    - Assicurati che il tuo wallet sia collegato alla rete Sepolia.
 
-2. **Caricamento e compilazione del contratto**:
-   - Carica i file del contratto nel tuo workspace su Remix.
-   - Compila il contratto utilizzando la versione corretta del compilatore.
+2. **Caricamento e compilazione dello smart contract**:
+   - Carica i file dello smart contract nel tuo workspace su Remix.
+   - Compila lo smart contract utilizzando la versione corretta del compilatore.
 
 3. **Deploy**:
    - Nella sezione "Deploy & Run Transactions" di Remix, seleziona "Injected Web3" come ambiente.
-   - Scegli il contratto da deployare e clicca su "Deploy".
+   - Scegli lo smart contract da deployare e clicca su "Deploy".
    - Conferma la transazione nel tuo wallet.
 
 ### Verifica
 
-Dopo aver completato il deploy, è possibile interagire con il contratto attraverso il frontend o direttamente tramite uno script Hardhat o la console di Remix per mintare i tuoi NFT.
+Dopo aver completato il deploy, è possibile interagire con lo smart contract attraverso il frontend o direttamente tramite uno script Hardhat o la console di Remix per mintare i tuoi NFT.
 
 
 ## Frontend del Marketplace
@@ -149,7 +150,7 @@ Il frontend del MooveMP Marketplace è costruito con React e offre diverse pagin
 ### Minting NFT
 
 - **URL**: `/mint`
-- **Descrizione**: Questa pagina permette all'admin di Moove (Owner del contratto) di mintari nuovi NFT con le caratteristiche desiderate a un prezzo scelto al momento del minting.
+- **Descrizione**: Questa pagina permette all'admin di Moove (Owner dello smart contract) di mintari nuovi NFT con le caratteristiche desiderate a un prezzo scelto al momento del minting.
 - **Funzionalità principali**:
   - Minting NFT's.
   - Opzioni per aggiunta caratterstiche e prezzo.
