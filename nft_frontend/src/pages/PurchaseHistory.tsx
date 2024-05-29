@@ -77,7 +77,7 @@ const PurchaseHistory = () => {
 
     return (
         <div className="flex justify-center items-center mt-4 mb-12 flex-col">
-            <h1 className="mb-12 flex flex-col items-center pt-8 bg-gradient-to-r from-purple-500 to-sky-500 text-transparent bg-clip-text inline-block">PURCHASE HISTORY</h1>
+            <h1 className="mb-12 flex flex-col items-center pt-8 bg-gradient-to-r from-purple-500 to-sky-500 text-transparent bg-clip-text inline-block">CRONOLOGIA TRANSAZIONI</h1>
             <div className="grid flex flex-col items-center grid-cols-1 gap-8 mt-5 w-auto max-w-3xl">
             {history
                 .sort((a, b) => b.timestamp - a.timestamp)

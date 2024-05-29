@@ -42,7 +42,7 @@ const OwnedNFTs: React.FC = () => {
             <h1 className="mb-16 flex flex-col items-center pt-8 bg-gradient-to-r from-purple-500 to-sky-500 text-transparent bg-clip-text inline-block">I MIEI NFT</h1>
             <div className="grid gap-12 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-4">
                 {nfts.map(nft => (
-                    <div key={nft.tokenId} className="text-center bg-white rounded-lg shadow-[0px_0px_15px_5px_#edf2f7] hover:shadow-[0px_0px_15px_10px_#EBF4FF] transition-all duration-300 ease-in-out transform hover:scale-105 cursor-pointer p-4 mt-4">
+                    <div key={nft.tokenId} className="text-center bg-white rounded-lg shadow-[0px_0px_15px_5px_#edf2f7] p-4 mt-4">
                         <img src={`https://images.unsplash.com/photo-1577344718665-3e7c0c1ecf6b?q=80&w=2069&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D`} alt={`NFT ${nft.tokenId}`} className="h-auto mb-4 rounded-lg mx-auto" />
                         <p className="text-sm mt-8">
                             <span className="font-bold">Token ID:</span> {nft.tokenId}
