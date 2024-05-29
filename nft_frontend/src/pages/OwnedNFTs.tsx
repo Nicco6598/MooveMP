@@ -48,7 +48,7 @@ const OwnedNFTs: React.FC = () => {
                             <span className="font-bold">Token ID:</span> {nft.tokenId}
                         </p>
                         <p className="text-gray-700 text-sm font-semibold mb-8 truncate">
-                            Buyer: <a href={`https://sepolia.etherscan.io/address/${nft.owner}`} target="_blank" rel="noopener noreferrer" className="text-sky-500 hover:underline">{nft.owner.slice(0, 7)}...{nft.owner.slice(-5)}</a>
+                            Owner: <a href={`https://sepolia.etherscan.io/address/${nft.owner}`} target="_blank" rel="noopener noreferrer" className="text-sky-500 hover:underline">{nft.owner.slice(0, 7)}...{nft.owner.slice(-5)}</a>
                         </p>
                         <p className="text-sm mb-1 bg-gradient-to-r from-purple-500 to-sky-500 text-transparent bg-clip-text inline-block">
                             <span className="font-bold">{nft.rarity}</span> 
