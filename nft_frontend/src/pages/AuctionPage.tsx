@@ -13,9 +13,10 @@ interface NFT {
     auctionEnd: number;
 }
 
+const provider = new ethers.providers.Web3Provider(window.ethereum);
+
 const AuctionPage: React.FC = () => {
     const [nfts, setNfts] = useState<NFT[]>([]);
-    const provider = new ethers.providers.Web3Provider(window.ethereum);
 
     useEffect(() => {
         const fetchAuctionNFTs = async () => {
@@ -39,7 +40,7 @@ const AuctionPage: React.FC = () => {
         };
 
         fetchAuctionNFTs();
-    }, []);
+    }, [provider]);
 
     const calculateTimeRemaining = (auctionEnd: number) => {
         const now = Math.floor(Date.now() / 1000);
