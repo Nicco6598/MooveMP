@@ -1,5 +1,15 @@
 {
-    "rewrites":  [
-        {"source": "/(.*)", "destination": "/"}
-     ]
- }
+    "builds": [
+      {
+        "src": "nft_frontend/package.json",
+        "use": "@vercel/node"
+      }
+    ],
+    "routes": [
+      {
+        "src": "/(.*)",
+        "dest": "nft_frontend/$1"
+      }
+    ]
+  }
+  
