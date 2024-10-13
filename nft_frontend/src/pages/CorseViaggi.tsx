@@ -8,7 +8,7 @@ interface NFT {
   owner: string;
   price: ethers.BigNumber;
   rarity: string;
-  discount: string; // Mantieni come stringa per gestire la percentuale
+  discount: string;
   discountOn: string;
 }
 
@@ -16,11 +16,15 @@ const CorseViaggi: React.FC = () => {
   const { provider } = useContext(ProviderContext);
   const [nfts, setNfts] = useState<NFT[]>([]);
   const [rideType, setRideType] = useState<string>('Monopattino');
-  const [minutes, setMinutes] = useState<number>(0);
+  const [minutes, setMinutes] = useState<number>(1); // Imposta il valore di default a 1
   const [finalPrice, setFinalPrice] = useState<ethers.BigNumber>(ethers.BigNumber.from(0));
   const [discountedPrice, setDiscountedPrice] = useState<ethers.BigNumber>(ethers.BigNumber.from(0));
-  const [maxDiscountValue, setMaxDiscountValue] = useState<number>(0); // Stato per maxDiscountValue
+  const [maxDiscountValue, setMaxDiscountValue] = useState<number>(0);
   const [imageSrc, setImageSrc] = useState<string>('');
+  const [isPopupVisible, setIsPopupVisible] = useState<boolean>(false);
+  const [locationStatus, setLocationStatus] = useState<string>('');
+  const [userLatitude, setUserLatitude] = useState<number | null>(null);
+  const [userLongitude, setUserLongitude] = useState<number | null>(null);
 
   const ridePrices: { [key: string]: ethers.BigNumber } = {
     Monopattino: ethers.utils.parseEther('0.0005'),
@@ -44,7 +48,6 @@ const CorseViaggi: React.FC = () => {
           items.push({ tokenId: i, owner, price: tokenPrice, rarity, discount, discountOn });
         }
       }
-      console.log('NFTs Owned:', items); // Log degli NFT recuperati
       setNfts(items);
     };
 
@@ -56,42 +59,24 @@ const CorseViaggi: React.FC = () => {
     let totalPrice = fixedPrice.mul(minutes);
     let totalDiscountedPrice = totalPrice;
 
-    // Controllo della validità di minutes
     if (isNaN(minutes) || minutes <= 0) {
-      console.warn('Invalid minutes value:', minutes);
       setFinalPrice(ethers.BigNumber.from(0));
       setDiscountedPrice(ethers.BigNumber.from(0));
-      setMaxDiscountValue(0); // Reset max discount
+      setMaxDiscountValue(0);
       return;
     }
 
     let maxDiscount = 0;
 
     nfts.forEach(nft => {
-      console.log(`Processing NFT ID: ${nft.tokenId}, discount: ${nft.discount}, discountOn: ${nft.discountOn}`);
       if (nft.discountOn.includes("Viaggi")) {
-        console.log(`Raw discount: ${nft.discount}`);
-
-        // Rimuovi il prefisso "Discount: " e il simbolo %
-        const discountStr = nft.discount.replace('Discount: ', '').replace('%', '').trim();
-
-        // Log per vedere il valore di discountStr prima del parsing
-        console.log(`Discount String for parsing: '${discountStr}'`);
-
-        // Converti in numero
-        const discountValue = parseFloat(discountStr);
-
-        // Log del valore di sconto dopo il parsing
-        console.log(`Discount Value (parsed): ${discountValue}`);
-
-        // Verifica se discountValue è un numero valido
+        const discountValue = parseFloat(nft.discount.replace('Discount: ', '').replace('%', ''));
         if (!isNaN(discountValue) && discountValue > maxDiscount) {
-          maxDiscount = discountValue; // Aggiorna il massimo sconto
+          maxDiscount = discountValue;
         }
       }
     });
 
-    // Calcola l'importo dello sconto massimo
     if (maxDiscount > 0) {
       const discountAmount = totalPrice.mul(maxDiscount).div(100);
       totalDiscountedPrice = totalDiscountedPrice.sub(discountAmount);
@@ -99,7 +84,7 @@ const CorseViaggi: React.FC = () => {
 
     setFinalPrice(totalPrice);
     setDiscountedPrice(totalDiscountedPrice);
-    setMaxDiscountValue(maxDiscount); // Aggiorna maxDiscountValue nello stato
+    setMaxDiscountValue(maxDiscount);
   };
 
   useEffect(() => {
@@ -124,10 +109,40 @@ const CorseViaggi: React.FC = () => {
     }
   };
 
+  const handleStartRide = async () => {
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition((position) => {
+        const { latitude, longitude } = position.coords;
+        setUserLatitude(latitude);
+        setUserLongitude(longitude);
+
+        const isWithinMilano = latitude >= 45.40 && latitude <= 45.50 && longitude >= 9.10 && longitude <= 9.30;
+
+        if (isWithinMilano) {
+          setLocationStatus('Sei nella zona di Milano, puoi iniziare la corsa!');
+        } else {
+          setLocationStatus('Ti trovi fuori dalla zona di Milano!');
+        }
+
+        setIsPopupVisible(true); // Mostra il pop-up
+      }, () => {
+        setLocationStatus('Impossibile ottenere la geolocalizzazione.');
+        setIsPopupVisible(true);
+      });
+    } else {
+      setLocationStatus('Geolocalizzazione non supportata dal browser.');
+      setIsPopupVisible(true);
+    }
+  };
+
+  const closePopup = () => {
+    setIsPopupVisible(false);
+  };
+
   return (
     <div className="flex flex-col items-center justify-center mt-10">
-      <h1 className="mb-12 flex flex-col items-center pt-8 bg-gradient-to-r from-purple-500 to-sky-500 text-transparent bg-clip-text inline-block">CORSE</h1>
-      <div className="text-center bg-white rounded-lg shadow-[0px_0px_15px_5px_#edf2f7] p-4 mt-4">
+      <h1 className="mb-12 bg-gradient-to-r from-purple-500 to-sky-500 text-transparent bg-clip-text">CORSE</h1>
+      <div className="text-center bg-white rounded-lg shadow p-4 mt-4">
         {imageSrc && <img src={imageSrc} alt={rideType} className="w-64 h-auto mb-4" />}
         <label className="block mb-4 text-lg">
           Tipo di Corsa:
@@ -145,35 +160,54 @@ const CorseViaggi: React.FC = () => {
           Minuti:
           <input
             type="number"
-            value={minutes > 0 ? minutes : ''} // Imposta a '' se minutes è <= 0
+            value={minutes} // Non lasciare vuoto, mostra sempre 1 minuto
             onChange={(e) => {
               const newValue = Number(e.target.value);
-              setMinutes(newValue >= 0 ? newValue : 0); // Assicurati che minutes non sia mai negativo
+              setMinutes(newValue >= 1 ? newValue : 1); // Imposta a 1 se l'input è minore di 1
             }} 
             className="border rounded p-2 w-full mt-2"
           />
         </label>
 
-        {/* Tabella dei prezzi */}
         <div className="mt-4 bg-gray-100 p-4 rounded-lg">
-          <div className="flex justify-between items-center">
-            <span className="text-lg"></span>
-            <span className="text-lg font-bold text-red-500">{ethers.utils.formatEther(finalPrice)} ETH</span>
-          </div>
-          <div className="flex justify-between items-center my-2">
-            <span className="text-xl font-bold">-</span>
-            <span className="text-lg text-amber-500 font-bold">
-            {ethers.utils.formatEther(finalPrice.sub(discountedPrice))} ({maxDiscountValue}%)
-            </span>
-          </div>
-          <hr className="border-gray-400" />
           <div className="flex justify-between items-center mt-2">
             <span className="text-xl font-bold">Totale: </span>
-            <span className="text-lg font-bold text-green-500">{ethers.utils.formatEther(discountedPrice)} ETH</span>
+            <span className="text-lg font-bold text-green-500">
+              {ethers.utils.formatEther(discountedPrice)} ETH
+            </span>
           </div>
         </div>
 
+        <button 
+          onClick={handleStartRide} 
+          className="mt-4 bg-blue-500 text-white p-2 rounded"
+        >
+          Avvia Corsa
+        </button>
       </div>
+
+      {/* Popup geolocalizzazione */} 
+      {isPopupVisible && (
+        <div className="fixed top-12 left-0 w-full h-full flex items-center justify-center bg-black bg-opacity-50">
+          <div className="bg-white p-8 rounded-lg shadow-lg text-center">
+            <h2 className="text-2xl mb-4 font-bold">Trova la tua {rideType}</h2>
+            <p>{locationStatus}</p>
+            {userLatitude && userLongitude && (
+              <iframe 
+                src={`https://www.openstreetmap.org/export/embed.html?bbox=${userLongitude - 0.01},${userLatitude - 0.01},${userLongitude + 0.01},${userLatitude + 0.01}&layer=mapnik&marker=${userLatitude},${userLongitude}`}
+                width="600" 
+                height="400" 
+                className="mt-4" 
+                style={{ border: 'none' }}
+                title="Mappa della posizione"
+              ></iframe>
+            )}
+            <button onClick={closePopup} className="mt-4 ml-4 bg-red-500 text-white p-2 rounded">
+              Chiudi
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
