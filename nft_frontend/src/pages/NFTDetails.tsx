@@ -190,12 +190,12 @@ const NFTDetails: React.FC = () => {
                     </div>
                 </div>
             )}
-            <h1 className="mb-6 flex flex-col items-center pt-8 bg-gradient-to-r from-purple-500 to-sky-500 text-transparent bg-clip-text inline-block text-2xl">NFT DETAILS</h1>
+            <h1 className="mb-6 flex flex-col items-center pt-8 bg-gradient-to-r from-purple-500 to-sky-500 text-transparent bg-clip-text inline-block text-2xl">DETTAGLIO NFT</h1>
             {details && (
                 <div className="text-center bg-white rounded-lg shadow-[0px_0px_15px_5px_#edf2f7] hover:shadow-[0px_0px_15px_10px_#EBF4FF] transition-all duration-300 ease-in-out transform p-4 mb-8 flex flex-wrap">
                     <div className="w-full md:w-1/2 mb-4 md:mb-0">
                         <img
-                            src={`https://images.unsplash.com/photo-1577344718665-3e7c0c1ecf6b?q=80&w=2069&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D`}
+                            src={`https://plus.unsplash.com/premium_photo-1715255817707-fa60ecc054d3?q=80&w=1974&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D`}
                             alt={`NFT ${details.tokenId}`}
                             className="w-auto h-full rounded-lg mb-4"
                         />
