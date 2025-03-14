@@ -1,8 +1,8 @@
 import React, { useState, useEffect, useContext } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, Link } from 'react-router-dom';
 import { ethers } from 'ethers';
 import getContract from '../utils/getContract';
-import { ProviderContext } from './ProviderContext'; // Importa il contesto del provider
+import { ProviderContext } from './ProviderContext';
 
 interface NFTDetailsProps {
     tokenId: number;
@@ -12,7 +12,12 @@ interface NFTDetailsProps {
     auctionDuration: number;
     highestBid: ethers.BigNumber;
     highestBidder: string;
-    formattedHighestBidder: string; // Supponendo che formattedHighestBidder sia di tipo string
+    formattedHighestBidder: string;
+    attributes: {
+        rarity: string;
+        discount: string;
+        discountOn: string;
+    };
 }
 
 const NFTDetails: React.FC = () => {
@@ -20,9 +25,11 @@ const NFTDetails: React.FC = () => {
     const [details, setDetails] = useState<NFTDetailsProps | null>(null);
     const [newPrice, setNewPrice] = useState('');
     const [auctionDuration, setAuctionDuration] = useState('');
+    const [bidAmount, setBidAmount] = useState('');
     const [userAccount, setUserAccount] = useState<string | null>(null);
-    const [loading, setLoading] = useState(false); // Stato per gestire il messaggio di attesa
-    const { provider } = useContext(ProviderContext); // Ottieni il provider dal contesto
+    const [loading, setLoading] = useState(true);
+    const [transactionPending, setTransactionPending] = useState(false);
+    const { provider } = useContext(ProviderContext);
 
     const formatDuration = (durationInSeconds: number) => {
         const days = Math.floor(durationInSeconds / (24 * 3600));
@@ -30,14 +37,15 @@ const NFTDetails: React.FC = () => {
         const minutes = Math.floor((durationInSeconds % 3600) / 60);
         const seconds = durationInSeconds % 60;
 
-        return `${days} giorni, ${hours} ore, ${minutes} minuti, ${seconds} secondi`;
+        return `${days}g ${hours}h ${minutes}m ${seconds}s`;
     };
 
     useEffect(() => {
         const fetchData = async () => {
             try {
-                if (provider && tokenId) { // Assicurati che il provider sia stato impostato e tokenId sia valido
-                    const signer = provider.getSigner(); // Usa il provider ottenuto dal contesto
+                if (provider && tokenId) {
+                    setLoading(true);
+                    const signer = provider.getSigner();
                     const contract = getContract(signer);
 
                     const owner = await contract.ownerOf(parseInt(tokenId));
@@ -45,9 +53,16 @@ const NFTDetails: React.FC = () => {
                     const highestBid = await contract.highestBid(parseInt(tokenId));
                     const highestBidder = await contract.highestBidder(parseInt(tokenId));
                     const auctionEnd = await contract.auctionEnds(parseInt(tokenId));
+                    const tokenAttributes = await contract.getTokenAttributes(parseInt(tokenId));
                     const isAuctionActive = auctionEnd > Date.now() / 1000;
                     const formattedHighestBidder = highestBidder.toLowerCase();
                     const formattedOwner = owner.toLowerCase();
+
+                    // Parse attributes
+                    const [rarity, discount, discountOn] = tokenAttributes.split(',').map((attr: string) => {
+                        const cleanedAttr = attr.replace(/.*?:/, '').trim();
+                        return cleanedAttr;
+                    });
 
                     let auctionDuration = 0;
                     if (isAuctionActive) {
@@ -63,14 +78,21 @@ const NFTDetails: React.FC = () => {
                         highestBid,
                         highestBidder,
                         formattedHighestBidder,
+                        attributes: {
+                            rarity,
+                            discount,
+                            discountOn
+                        }
                     });
 
                     // Richiedi l'account utente
                     const accounts = await window.ethereum.request({ method: 'eth_accounts' });
                     setUserAccount(accounts[0]);
+                    setLoading(false);
                 }
             } catch (error) {
                 console.error('Errore durante il fetch dei dati:', error);
+                setLoading(false);
             }
         };
 
@@ -80,7 +102,7 @@ const NFTDetails: React.FC = () => {
     const handleStartAuction = async () => {
         try {
             if (details && auctionDuration) {
-                setLoading(true);
+                setTransactionPending(true);
                 const signer = new ethers.providers.Web3Provider(window.ethereum).getSigner();
                 const contract = getContract(signer);
 
@@ -90,11 +112,11 @@ const NFTDetails: React.FC = () => {
 
                 const tx = await contract.startAuction(details.tokenId, parseInt(auctionDuration));
                 await tx.wait();
-                setLoading(false);
+                setTransactionPending(false);
                 alert('Asta iniziata con successo e migliori offerte resettate!');
             }
         } catch (error) {
-            setLoading(false);
+            setTransactionPending(false);
             console.error('Errore durante l\'inizio dell\'asta:', error);
             alert('Errore durante l\'inizio dell\'asta');
         }
@@ -103,7 +125,7 @@ const NFTDetails: React.FC = () => {
     const handleSetPrice = async () => {
         try {
             if (details && newPrice) {
-                setLoading(true);
+                setTransactionPending(true);
                 const signer = new ethers.providers.Web3Provider(window.ethereum).getSigner();
                 const contract = getContract(signer);
 
@@ -113,11 +135,11 @@ const NFTDetails: React.FC = () => {
 
                 const tx = await contract.sale(details.tokenId, ethers.utils.parseEther(newPrice));
                 await tx.wait();
-                setLoading(false);
+                setTransactionPending(false);
                 alert('Prezzo impostato con successo e migliori offerte resettate!');
             }
         } catch (error) {
-            setLoading(false);
+            setTransactionPending(false);
             console.error('Errore durante l\'impostazione del prezzo:', error);
             alert('Errore durante l\'impostazione del prezzo');
         }
@@ -125,18 +147,18 @@ const NFTDetails: React.FC = () => {
 
     const handleBid = async () => {
         try {
-            if (details && newPrice) {
-                setLoading(true);
+            if (details && bidAmount) {
+                setTransactionPending(true);
                 const signer = new ethers.providers.Web3Provider(window.ethereum).getSigner();
                 const contract = getContract(signer);
 
-                const tx = await contract.bid(details.tokenId, { value: ethers.utils.parseEther(newPrice) });
+                const tx = await contract.bid(details.tokenId, { value: ethers.utils.parseEther(bidAmount) });
                 await tx.wait();
-                setLoading(false);
+                setTransactionPending(false);
                 alert('Offerta effettuata con successo!');
             }
         } catch (error) {
-            setLoading(false);
+            setTransactionPending(false);
             console.error('Errore durante l\'offerta:', error);
             alert('Errore durante l\'offerta');
         }
@@ -145,17 +167,17 @@ const NFTDetails: React.FC = () => {
     const handleWithdrawRefund = async () => {
         try {
             if (details && userAccount) {
-                setLoading(true);
+                setTransactionPending(true);
                 const signer = new ethers.providers.Web3Provider(window.ethereum).getSigner();
                 const contract = getContract(signer);
 
                 const tx = await contract.withdrawRefund(details.tokenId);
                 await tx.wait();
-                setLoading(false);
+                setTransactionPending(false);
                 alert('Rimborso ritirato con successo!');
             }
         } catch (error) {
-            setLoading(false);
+            setTransactionPending(false);
             console.error('Errore durante il ritiro del rimborso:', error);
             alert('Errore durante il ritiro del rimborso');
         }
@@ -164,114 +186,262 @@ const NFTDetails: React.FC = () => {
     const handleRedeemNFT = async () => {
         try {
             if (details && userAccount) {
-                setLoading(true);
+                setTransactionPending(true);
                 const signer = new ethers.providers.Web3Provider(window.ethereum).getSigner();
                 const contract = getContract(signer);
 
                 const tx = await contract.redeemNFT(details.tokenId);
                 await tx.wait();
-                setLoading(false);
+                setTransactionPending(false);
                 alert('NFT riscattato con successo!');
             }
         } catch (error) {
-            setLoading(false);
+            setTransactionPending(false);
             console.error('Errore durante il riscatto dell\'NFT:', error);
             alert('Errore durante il riscatto dell\'NFT');
         }
     };
 
+    if (loading) {
+        return (
+            <div className="container mx-auto px-4 py-16 flex justify-center">
+                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-500"></div>
+            </div>
+        );
+    }
+
     return (
-        <div className="relative flex justify-center items-center mt-4 flex-col">
-            {loading && (
-                <div className="fixed inset-0 flex items-center justify-center bg-purple-200 bg-opacity-55 backdrop-blur z-50">
-                    <div className="bg-white p-6 rounded-lg border border-black shadow-[0px_0px_15px_5px_#0f0f0f] flex flex-col items-center">
-                        <p className="text-xl text-purple-500 font-bold mb-4">Attendi la conferma del tx...</p>
-                        <img src="https://i.gifer.com/yy3.gif" alt="Loading..." className="h-20 w-20" />
+        <div className="container mx-auto px-4 py-8">
+            {transactionPending && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
+                    <div className="bg-white p-8 rounded-2xl shadow-xl flex flex-col items-center">
+                        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary-500 mb-4"></div>
+                        <p className="text-lg font-medium text-neutral-800">Transazione in corso...</p>
+                        <p className="text-sm text-neutral-500 mt-2">Attendi la conferma della blockchain</p>
                     </div>
                 </div>
             )}
-            <h1 className="mb-6 flex flex-col items-center pt-8 bg-gradient-to-r from-purple-500 to-sky-500 text-transparent bg-clip-text inline-block text-2xl">DETTAGLIO NFT</h1>
+    
             {details && (
-                <div className="text-center bg-white rounded-lg shadow-[0px_0px_15px_5px_#edf2f7] hover:shadow-[0px_0px_15px_10px_#EBF4FF] transition-all duration-300 ease-in-out transform p-4 mb-8 flex flex-wrap">
-                    <div className="w-full md:w-1/2 mb-4 md:mb-0">
-                        <img
-                            src={`https://plus.unsplash.com/premium_photo-1715255817707-fa60ecc054d3?q=80&w=1974&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D`}
-                            alt={`NFT ${details.tokenId}`}
-                            className="w-auto h-full rounded-lg mb-4"
-                        />
-                    </div>
-                    <div className="w-full md:w-1/2 pl-0 md:pl-4">
-                        <div className="mb-6">
-                            <p>
-                                <span className="font-bold">Token ID:</span> {details.tokenId}
-                            </p>
-                            <p className="text-gray-900 text-m font-bold mb-1 truncate">
-                                Owner: <a href={`https://sepolia.etherscan.io/address/${details.owner}`} target="_blank" rel="noopener noreferrer" className="text-sky-500 hover:underline">{details.owner.slice(0, 7)}...{details.owner.slice(-5)}</a>
-                            </p>
-                        </div>
-                        <div className="mb-6">
-                            <p className="bg-gradient-to-r from-purple-500 to-sky-500 text-transparent bg-clip-text inline-block text-m font-bold">
-                                <span>Prezzo Attuale:</span> {ethers.utils.formatEther(details.price)} ETH
-                            </p>
-                            <p className="font-bold text-red-500 text-sm">
-                                <span>Durata Asta:</span> {details.auctionDuration > 0 ? formatDuration(details.auctionDuration) : 'Asta non attiva'}
-                            </p>
-                        </div>
-                        {details.auctionDuration > 0 && details.formattedOwner !== userAccount && (
-                            <div className="flex items-center mb-4">
-                                <input
-                                    type="text"
-                                    placeholder="Offri un prezzo in ETH"
-                                    value={newPrice}
-                                    onChange={e => setNewPrice(e.target.value)}
-                                    className="border p-3 rounded-xl w-full"
-                                />
-                                <button onClick={handleBid} className="bg-purple-500 text-white p-3 w-full rounded-xl hover:bg-purple-700 ml-4 transition-colors duration-300">Bid</button>
+                <div className="max-w-6xl mx-auto">
+                    <Link to="/marketplace" className="inline-flex items-center text-primary-600 hover:text-primary-700 mb-6 transition-colors">
+                        <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
+                        </svg>
+                        Torna al marketplace
+                    </Link>
+    
+                    <div className="bg-white/90 backdrop-blur-lg shadow-lg rounded-2xl overflow-hidden border border-neutral-200">
+                        <div className="grid md:grid-cols-2 gap-8">
+                            {/* Colonna immagine */}
+                            <div className="p-6 flex flex-col">
+                                <div className="relative aspect-square overflow-hidden rounded-xl mb-4">
+                                    <img
+                                        src={`https://picsum.photos/seed/${details.tokenId}/800/800`}
+                                        alt={`NFT ${details.tokenId}`}
+                                        className="w-full h-full object-cover"
+                                    />
+                                    <div className="absolute top-3 right-3 px-3 py-1 bg-white/80 backdrop-blur-sm rounded-lg text-sm font-medium">
+                                        #{details.tokenId}
+                                    </div>
+                                </div>
+    
+                                <div className="bg-neutral-50 rounded-xl p-4 mt-auto">
+                                    <h3 className="text-sm font-medium text-neutral-500 mb-2">Proprietario</h3>
+                                    <a 
+                                        href={`https://sepolia.etherscan.io/address/${details.owner}`}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className="inline-flex items-center text-primary-600 hover:underline"
+                                    >
+                                        <span className="font-mono">{details.owner.substring(0, 8)}...{details.owner.substring(details.owner.length - 6)}</span>
+                                        <svg className="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path>
+                                        </svg>
+                                    </a>
+                                </div>
                             </div>
-                        )}
-                        {details.auctionDuration === 0 && details.formattedOwner === userAccount && (
-                            <>
-                                <input
-                                    type="text"
-                                    placeholder="Prezzo ETH"
-                                    value={newPrice}
-                                    onChange={e => setNewPrice(e.target.value)}
-                                    className="border p-3 rounded-xl w-full mb-4"
-                                />
-                                <input
-                                    type="text"
-                                    placeholder="Durata Asta in giorni"
-                                    value={auctionDuration}
-                                    onChange={e => setAuctionDuration(e.target.value)}
-                                    className="border p-3 rounded-xl w-full mb-4"
-                                />
-                                <button onClick={handleSetPrice} className="bg-orange-500 text-white p-3 rounded-xl w-full mb-4 hover:bg-orange-700 transition-colors duration-300">Imposta Prezzo</button>
-                                <button onClick={handleStartAuction} className="bg-sky-500 text-white p-3 rounded-xl w-full hover:bg-sky-700 transition-colors duration-300">Inizia Asta</button>
-                            </>
-                        )}
+    
+                            {/* Colonna dettagli */}
+                            <div className="p-6 md:border-l border-neutral-200">
+                                <h1 className="text-2xl font-bold mb-4">NFT #{details.tokenId}</h1>
+                                
+                                <div className="grid grid-cols-2 gap-4 mb-6">
+                                    <div className="bg-neutral-50 rounded-xl p-4">
+                                        <h3 className="text-sm font-medium text-neutral-500 mb-1">Rarità</h3>
+                                        <p className="text-lg font-bold text-primary-700">{details.attributes.rarity}</p>
+                                    </div>
+                                    <div className="bg-neutral-50 rounded-xl p-4">
+                                        <h3 className="text-sm font-medium text-neutral-500 mb-1">Prezzo</h3>
+                                        <p className="text-lg font-bold text-transparent bg-clip-text bg-gradient-to-r from-primary-500 to-accent-500">
+                                            {ethers.utils.formatEther(details.price)} ETH
+                                        </p>
+                                    </div>
+                                    <div className="bg-neutral-50 rounded-xl p-4">
+                                        <h3 className="text-sm font-medium text-neutral-500 mb-1">Sconto</h3>
+                                        <p className="text-lg font-bold text-secondary-700">{details.attributes.discount}</p>
+                                    </div>
+                                    <div className="bg-neutral-50 rounded-xl p-4">
+                                        <h3 className="text-sm font-medium text-neutral-500 mb-1">Applicato su</h3>
+                                        <p className="text-lg font-bold text-secondary-700">{details.attributes.discountOn}</p>
+                                    </div>
+                                </div>
+    
+                                {details.auctionDuration > 0 && (
+                                    <div className="bg-primary-50 rounded-xl p-4 mb-6 border border-primary-100">
+                                        <h3 className="text-sm font-bold text-primary-700 mb-1">Asta attiva</h3>
+                                        <p className="text-lg font-bold text-primary-800 mb-4">
+                                            Tempo rimanente: {formatDuration(details.auctionDuration)}
+                                        </p>
+                                        
+                                        <div className="flex items-center justify-between">
+                                            <div>
+                                                <h4 className="text-sm text-neutral-500">Offerta massima</h4>
+                                                <p className="text-lg font-bold text-primary-600">
+                                                    {ethers.utils.formatEther(details.highestBid)} ETH
+                                                </p>
+                                            </div>
+                                            {details.highestBidder !== ethers.constants.AddressZero && (
+                                                <div>
+                                                    <h4 className="text-sm text-neutral-500">Miglior offerente</h4>
+                                                    <p className="text-sm font-mono truncate max-w-[150px]">
+                                                        {details.highestBidder.substring(0, 6)}...{details.highestBidder.substring(details.highestBidder.length - 4)}
+                                                    </p>
+                                                </div>
+                                            )}
+                                        </div>
+                                    </div>
+                                )}
+    
+                                {/* Pannello di controllo per proprietario */}
+                                {details.formattedOwner === userAccount && details.auctionDuration === 0 && (
+                                    <div className="border border-neutral-200 rounded-xl p-4 mb-6">
+                                        <h3 className="text-lg font-medium mb-4">Pannello di controllo</h3>
+                                        
+                                        <div className="space-y-4">
+                                            <div>
+                                                <label className="block text-sm font-medium text-neutral-700 mb-1">
+                                                    Prezzo (ETH)
+                                                </label>
+                                                <input
+                                                    type="text"
+                                                    value={newPrice}
+                                                    onChange={e => setNewPrice(e.target.value)}
+                                                    className="w-full p-2 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-all"
+                                                    placeholder="Inserisci il prezzo in ETH"
+                                                />
+                                            </div>
+                                            
+                                            <div>
+                                                <label className="block text-sm font-medium text-neutral-700 mb-1">
+                                                    Durata asta (giorni)
+                                                </label>
+                                                <input
+                                                    type="text"
+                                                    value={auctionDuration}
+                                                    onChange={e => setAuctionDuration(e.target.value)}
+                                                    className="w-full p-2 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-all"
+                                                    placeholder="Inserisci la durata in giorni"
+                                                />
+                                            </div>
+                                            
+                                            <div className="flex gap-4 pt-2">
+                                                <button
+                                                    onClick={handleSetPrice}
+                                                    className="flex-1 py-2 px-4 bg-secondary-500 text-white rounded-lg hover:bg-secondary-600 transition-colors font-medium"
+                                                    disabled={!newPrice}
+                                                >
+                                                    Imposta Prezzo
+                                                </button>
+                                                <button
+                                                    onClick={handleStartAuction}
+                                                    className="flex-1 py-2 px-4 bg-primary-500 text-white rounded-lg hover:bg-primary-600 transition-colors font-medium"
+                                                    disabled={!auctionDuration}
+                                                >
+                                                    Avvia Asta
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                )}
+                                
+                                {/* Pannello offerta per non proprietari */}
+                                {details.formattedOwner !== userAccount && details.auctionDuration > 0 && (
+                                    <div className="border border-neutral-200 rounded-xl p-4 mb-6">
+                                        <h3 className="text-lg font-medium mb-4">Fai un'offerta</h3>
+                                        
+                                        <div className="flex items-center gap-2">
+                                            <input
+                                                type="text"
+                                                value={bidAmount}
+                                                onChange={e => setBidAmount(e.target.value)}
+                                                className="flex-1 p-2 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-all"
+                                                placeholder="Importo in ETH"
+                                            />
+                                            <button
+                                                onClick={handleBid}
+                                                className="py-2 px-6 bg-primary-500 text-white rounded-lg hover:bg-primary-600 transition-colors font-medium whitespace-nowrap"
+                                                disabled={!bidAmount}
+                                            >
+                                                Offri
+                                            </button>
+                                        </div>
+                                        
+                                        <p className="text-xs text-neutral-500 mt-2">
+                                            *L'offerta deve essere superiore all'offerta corrente più alta
+                                        </p>
+                                    </div>
+                                )}
+                                
+                                {/* Pannello per il miglior offerente */}
+                                {details.formattedHighestBidder === userAccount && (
+                                    <div className="border border-neutral-200 rounded-xl p-4 mb-6 bg-green-50">
+                                        <h3 className="text-lg font-medium text-green-700 mb-2">
+                                            Sei il miglior offerente!
+                                        </h3>
+                                        
+                                        {details.auctionDuration === 0 && (
+                                            <div>
+                                                <p className="text-sm text-neutral-600 mb-4">
+                                                    L'asta è terminata e hai vinto! Puoi riscattare il tuo NFT.
+                                                </p>
+                                                <button
+                                                    onClick={handleRedeemNFT}
+                                                    className="w-full py-2 px-4 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors font-medium"
+                                                >
+                                                    Riscatta NFT
+                                                </button>
+                                            </div>
+                                        )}
+                                    </div>
+                                )}
+                                
+                                {/* Pannello per offerente precedente */}
+                                {details.highestBidder !== ethers.constants.AddressZero && 
+                                 details.formattedHighestBidder !== userAccount && 
+                                 details.auctionDuration > 0 && (
+                                    <div className="border border-red-200 rounded-xl p-4 mb-6 bg-red-50">
+                                        <h3 className="text-lg font-medium text-red-700 mb-2">
+                                            La tua offerta è stata superata
+                                        </h3>
+                                        <p className="text-sm text-neutral-600 mb-4">
+                                            Puoi ritirare il tuo deposito precedente e fare una nuova offerta.
+                                        </p>
+                                        <button
+                                            onClick={handleWithdrawRefund}
+                                            className="w-full py-2 px-4 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors font-medium"
+                                        >
+                                            Ritira rimborso
+                                        </button>
+                                    </div>
+                                )}
+                            </div>
+                        </div>
                     </div>
-                </div>
-            )}
-            {details && details.formattedHighestBidder !== userAccount && details.auctionDuration > 0 && (
-                <div className="text-center w-full md:w-1/3 truncate p-4 md:p-8 bg-sky-200 rounded-lg mb-12">
-                    <div className="text-lg font-bold mb-2">Miglior Offerta:</div>
-                    <div className="text-xl truncate mb-2">{ethers.utils.formatEther(details.highestBid)} ETH</div>
-                    <div className="text-red-500 font-bold">{details.highestBidder}</div>
-                    <button onClick={handleWithdrawRefund} className="bg-red-500 text-white p-3 rounded-xl w-full hover:bg-red-700 transition-colors duration-300 mt-4">RIMBORSA VECCHIA OFFERTA</button>
-                </div>
-            )}
-            {details && details.formattedHighestBidder === userAccount && (
-                <div className="text-center w-full md:w-1/3 truncate p-4 md:p-8 bg-sky-200 rounded-lg mb-12">
-                    <div className="text-lg font-bold mb-2">Miglior Offerta:</div>
-                    <div className="text-xl truncate mb-2">{ethers.utils.formatEther(details.highestBid)} ETH</div>
-                    <div className="text-green-500 font-bold">{details.highestBidder}</div>
-                    {details.auctionDuration === 0 && (
-                        <button onClick={handleRedeemNFT} className="bg-green-500 text-white p-3 rounded-xl w-full hover:bg-green-700 transition-colors duration-300 mt-4">RISCUOTI NFT</button>
-                    )}
                 </div>
             )}
         </div>
     );
-};
+}
 
 export default NFTDetails;

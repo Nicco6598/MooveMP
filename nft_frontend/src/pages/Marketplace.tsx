@@ -15,29 +15,37 @@ interface NFT {
 
 const Marketplace: React.FC = () => {
     const [nfts, setNfts] = useState<NFT[]>([]);
+    const [loading, setLoading] = useState(true);
+    const [filter, setFilter] = useState('all');
     const provider = new ethers.providers.Web3Provider(window.ethereum);
     const signer = provider.getSigner();
 
     useEffect(() => {
         const fetchNFTs = async () => {
+            setLoading(true);
             const contract = getContract(provider);
             const items: NFT[] = [];
-            const totalSupply = await contract.nextTokenId();
-            for (let i = 0; i < totalSupply.toNumber(); i++) {
-                const owner = await contract.ownerOf(i);
-                const tokenPrice = await contract.tokenPrices(i);
-                const tokenAttributes = await contract.getTokenAttributes(i);
-                const isForSale = await contract.isForSale(i);
+            try {
+                const totalSupply = await contract.nextTokenId();
+                for (let i = 0; i < totalSupply.toNumber(); i++) {
+                    const owner = await contract.ownerOf(i);
+                    const tokenPrice = await contract.tokenPrices(i);
+                    const tokenAttributes = await contract.getTokenAttributes(i);
+                    const isForSale = await contract.isForSale(i);
 
-                // Pulisci i valori per rimuovere eventuali etichette in inglese
-                const [rarity, discount, discountOn] = tokenAttributes.split(',').map((attr: string) => {
-                    const cleanedAttr = attr.replace(/.*?:/, '').trim(); // Rimuove la parte prima dei due punti e gli spazi
-                    return cleanedAttr;
-                });
+                    const [rarity, discount, discountOn] = tokenAttributes.split(',').map((attr: string) => {
+                        const cleanedAttr = attr.replace(/.*?:/, '').trim();
+                        return cleanedAttr;
+                    });
 
-                items.push({ tokenId: i, owner, price: tokenPrice, rarity, discount, discountOn, isForSale });
+                    items.push({ tokenId: i, owner, price: tokenPrice, rarity, discount, discountOn, isForSale });
+                }
+                setNfts(items);
+            } catch (error) {
+                console.error("Error fetching NFTs:", error);
+            } finally {
+                setLoading(false);
             }
-            setNfts(items);
         };
 
         fetchNFTs();
@@ -56,46 +64,138 @@ const Marketplace: React.FC = () => {
         }
     };
 
+    const filteredNfts = filter === 'all' 
+        ? nfts 
+        : filter === 'forSale' 
+            ? nfts.filter(nft => nft.isForSale) 
+            : nfts.filter(nft => !nft.isForSale);
+
     return (
-        <div className="p-5">
-            <h1 className="mb-12 flex flex-col items-center pt-8 bg-gradient-to-r from-purple-500 to-sky-500 text-transparent bg-clip-text inline-block">MARKETPLACE NFT</h1>
-            <div className="grid gap-12 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-4">
-                {nfts.map(nft => (
-                    <div key={nft.tokenId} className="text-center bg-white rounded-lg shadow-[0px_0px_15px_5px_#edf2f7] p-4 mt-4">
-                        <img src={`https://plus.unsplash.com/premium_photo-1715255817707-fa60ecc054d3?q=80&w=1974&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D`} alt={`NFT ${nft.tokenId}`} className="h-auto mb-4 rounded-lg mx-auto" />
-                        <p className="text-sm mt-8">
-                            <span className="font-bold">Token ID:</span> {nft.tokenId}
-                        </p>
-                        <p className="text-gray-700 text-sm font-semibold mb-8 truncate">
-                            Owner: <a href={`https://sepolia.etherscan.io/address/${nft.owner}`} target="_blank" rel="noopener noreferrer" className="text-sky-500 hover:underline">{nft.owner.slice(0, 7)}...{nft.owner.slice(-5)}</a>
-                        </p>
-                        <p className="text-sm mb-1 bg-gradient-to-r from-purple-500 to-sky-500 text-transparent bg-clip-text inline-block">
-                            <span className="font-bold">Rarità:</span> {nft.rarity}
-                        </p>
-                        <p></p>
-                        <p className="text-sm mb-1 bg-gradient-to-r from-purple-500 to-sky-500 text-transparent bg-clip-text inline-block">
-                            <span className="font-bold">Sconto:</span> {nft.discount}
-                        </p>
-                        <p></p>
-                        <p className="text-sm mb-8 bg-gradient-to-r from-purple-500 to-sky-500 text-transparent bg-clip-text inline-block">
-                            <span className="font-bold">Sconto su:</span> {nft.discountOn}
-                        </p>
-                        <p className="text-xl mb-1">
-                            <span className="font-bold text-xl bg-gradient-to-r from-amber-500 to-orange-500 text-transparent bg-clip-text inline-block mb-8">Prezzo: {ethers.utils.formatEther(nft.price)} ETH </span>
-                        </p>
-                        {nft.isForSale && (
-                            <div className="flex justify-center space-x-4 mb-4">
-                                <button onClick={() => purchaseNFT(nft.tokenId, nft.price)} className="bg-purple-500 text-white p-2 rounded-lg hover:bg-purple-700 transition-colors duration-300 ease-in-out">
-                                    Compra Ora
-                                </button>
-                            </div>
-                        )}
-                        <Link to={`/nft/${nft.tokenId}`} className="bg-sky-500 text-white p-2 rounded-lg hover:bg-sky-700 transition-colors duration-300 ease-in-out">
-                            Visualizza Dettagli
-                        </Link>
-                    </div>
-                ))}
+        <div className="container mx-auto px-4 py-8">
+            <div className="flex flex-col items-center mb-10">
+                <h1 className="text-3xl md:text-4xl font-display font-bold text-transparent bg-clip-text bg-gradient-to-r from-primary-500 to-secondary-500 mb-4">
+                    Marketplace NFT
+                </h1>
+                <p className="text-neutral-600 max-w-2xl text-center mb-6">
+                    Esplora e acquista NFT unici che offrono sconti esclusivi per i servizi di mobilità Moove.
+                </p>
+                
+                <div className="flex space-x-2 bg-neutral-100 p-1 rounded-xl mb-8">
+                    <button 
+                        onClick={() => setFilter('all')} 
+                        className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
+                            filter === 'all' ? 'bg-white shadow text-primary-700' : 'text-neutral-600 hover:bg-white/50'
+                        }`}
+                    >
+                        Tutti
+                    </button>
+                    <button 
+                        onClick={() => setFilter('forSale')} 
+                        className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
+                            filter === 'forSale' ? 'bg-white shadow text-primary-700' : 'text-neutral-600 hover:bg-white/50'
+                        }`}
+                    >
+                        In vendita
+                    </button>
+                    <button 
+                        onClick={() => setFilter('notForSale')} 
+                        className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
+                            filter === 'notForSale' ? 'bg-white shadow text-primary-700' : 'text-neutral-600 hover:bg-white/50'
+                        }`}
+                    >
+                        Non in vendita
+                    </button>
+                </div>
             </div>
+            
+            {loading ? (
+                <div className="flex justify-center items-center h-64">
+                    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-500"></div>
+                </div>
+            ) : filteredNfts.length === 0 ? (
+                <div className="text-center py-12">
+                    <p className="text-lg text-neutral-600">Nessun NFT disponibile con i filtri selezionati.</p>
+                </div>
+            ) : (
+                <div className="grid gap-6 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+                    {filteredNfts.map(nft => (
+                        <div key={nft.tokenId} className="bg-white/80 backdrop-blur-lg rounded-2xl overflow-hidden transition-all duration-300 hover:shadow-xl border border-neutral-200 hover:translate-y-[-4px]">
+                            <div className="relative">
+                                <img 
+                                    src={`https://picsum.photos/seed/${nft.tokenId}/400/300`} 
+                                    alt={`NFT ${nft.tokenId}`} 
+                                    className="w-full h-48 object-cover"
+                                />
+                                <div className="absolute top-3 right-3 px-2 py-1 bg-white/80 backdrop-blur-sm rounded-lg text-xs font-medium">
+                                    #{nft.tokenId}
+                                </div>
+                            </div>
+                            
+                            <div className="p-5">
+                                <div className="flex justify-between items-start mb-3">
+                                    <div>
+                                        <p className="text-xs text-neutral-500 mb-1">Proprietario</p>
+                                        <a 
+                                            href={`https://sepolia.etherscan.io/address/${nft.owner}`} 
+                                            target="_blank" 
+                                            rel="noopener noreferrer" 
+                                            className="text-xs text-primary-600 hover:underline"
+                                        >
+                                            {nft.owner.slice(0, 6)}...{nft.owner.slice(-4)}
+                                        </a>
+                                    </div>
+                                    <div className="px-2 py-1 bg-primary-100 rounded-lg">
+                                        <p className="text-xs font-medium text-primary-700">{nft.rarity}</p>
+                                    </div>
+                                </div>
+                                
+                                <div className="space-y-2 mb-4">
+                                    <div className="flex items-center">
+                                        <p className="text-xs text-neutral-500 w-20">Sconto:</p>
+                                        <p className="text-sm font-medium">{nft.discount}</p>
+                                    </div>
+                                    <div className="flex items-center">
+                                        <p className="text-xs text-neutral-500 w-20">Applicato su:</p>
+                                        <p className="text-sm font-medium">{nft.discountOn}</p>
+                                    </div>
+                                </div>
+                                
+                                <div className="flex justify-between items-center mb-4">
+                                    <div>
+                                        <p className="text-xs text-neutral-500">Prezzo</p>
+                                        <p className="text-lg font-bold text-transparent bg-clip-text bg-gradient-to-r from-primary-500 to-accent-500">
+                                            {ethers.utils.formatEther(nft.price)} ETH
+                                        </p>
+                                    </div>
+                                    <div>
+                                        <p className="text-xs text-neutral-500 text-right">Stato</p>
+                                        <p className={`text-sm font-medium ${nft.isForSale ? 'text-green-500' : 'text-neutral-500'}`}>
+                                            {nft.isForSale ? 'In vendita' : 'Non in vendita'}
+                                        </p>
+                                    </div>
+                                </div>
+                                
+                                <div className="flex gap-2">
+                                    {nft.isForSale && (
+                                        <button 
+                                            onClick={() => purchaseNFT(nft.tokenId, nft.price)} 
+                                            className="flex-1 py-2 bg-primary-500 text-white text-sm font-medium rounded-xl hover:bg-primary-600 transition-colors"
+                                        >
+                                            Compra
+                                        </button>
+                                    )}
+                                    <Link 
+                                        to={`/nft/${nft.tokenId}`} 
+                                        className={`${nft.isForSale ? 'flex-1' : 'w-full'} py-2 text-center bg-neutral-100 text-neutral-700 text-sm font-medium rounded-xl hover:bg-neutral-200 transition-colors`}
+                                    >
+                                        Dettagli
+                                    </Link>
+                                </div>
+                            </div>
+                        </div>
+                    ))}
+                </div>
+            )}
         </div>
     );
 };

@@ -13,7 +13,7 @@
     "@types/react": "^18.2.78",
     "@types/react-dom": "^18.2.25",
     "@types/web3": "^1.2.2",
-    "@walletconnect/web3-provider": "^1.8.0",
+    "@walletconnect/ethereum-provider": "^2.19.1",
     "ethers": "^5.7.2",
     "ipfs-http-client": "^60.0.1",
     "leaflet": "^1.9.4",

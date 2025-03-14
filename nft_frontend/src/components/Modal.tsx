@@ -1,22 +1,90 @@
-import React from 'react';
+import React, { useEffect, useRef } from 'react';
 
 interface ModalProps {
-    isOpen: boolean; // Proprietà obbligatoria per gestire l'apertura del Modal
+    isOpen: boolean;
     onClose: () => void;
+    title?: string;
     children: React.ReactNode;
+    size?: 'sm' | 'md' | 'lg' | 'xl';
 }
 
-export const Modal: React.FC<ModalProps> = ({ isOpen, onClose, children }) => {
-    if (!isOpen) return null; // Se isOpen è false, non mostrare nulla
+export const Modal: React.FC<ModalProps> = ({ 
+    isOpen, 
+    onClose, 
+    title, 
+    children, 
+    size = 'md' 
+}) => {
+    const modalRef = useRef<HTMLDivElement>(null);
+
+    useEffect(() => {
+        const handleEscape = (e: KeyboardEvent) => {
+            if (e.key === 'Escape') {
+                onClose();
+            }
+        };
+
+        const handleClickOutside = (e: MouseEvent) => {
+            if (modalRef.current && !modalRef.current.contains(e.target as Node)) {
+                onClose();
+            }
+        };
+
+        if (isOpen) {
+            document.addEventListener('keydown', handleEscape);
+            document.addEventListener('mousedown', handleClickOutside);
+            document.body.style.overflow = 'hidden';
+        }
+
+        return () => {
+            document.removeEventListener('keydown', handleEscape);
+            document.removeEventListener('mousedown', handleClickOutside);
+            document.body.style.overflow = 'auto';
+        };
+    }, [isOpen, onClose]);
+
+    if (!isOpen) return null;
+
+    // Calcola la classe di larghezza in base alla proprietà size
+    const sizeClasses = {
+        sm: 'max-w-sm',
+        md: 'max-w-md',
+        lg: 'max-w-lg',
+        xl: 'max-w-xl',
+    };
 
     return (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center">
-            <div className="bg-white p-6 rounded-lg shadow-lg max-w-md w-full">
-                <button onClick={onClose} className="absolute top-2 right-2 text-gray-600 hover:text-gray-800">
-                    X
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm transition-opacity duration-300">
+            <div 
+                ref={modalRef}
+                className={`bg-white relative rounded-2xl shadow-xl ${sizeClasses[size]} w-full animate-[fadeIn_0.3s_ease-out]`}
+            >
+                {title && (
+                    <div className="border-b border-neutral-200 px-6 py-4">
+                        <h3 className="text-lg font-medium text-neutral-800">{title}</h3>
+                    </div>
+                )}
+                
+                <button 
+                    onClick={onClose}
+                    className="absolute top-4 right-4 p-1 rounded-full text-neutral-500 hover:text-neutral-700 hover:bg-neutral-100 transition-colors"
+                    aria-label="Chiudi"
+                >
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
                 </button>
-                {children}
+                
+                <div className={`p-6 ${title ? 'pt-4' : ''}`}>
+                    {children}
+                </div>
             </div>
         </div>
     );
 };
+
+// Aggiungi questa animazione nel file CSS globale o in una keyframes declaration nel tailwind.config.js
+// @keyframes fadeIn {
+//   from { opacity: 0; transform: translateY(-20px); }
+//   to { opacity: 1; transform: translateY(0); }
+// }
