@@ -1,11 +1,17 @@
 import { ethers } from 'hardhat';
 
 async function main() {
-  const ContractFactory = await ethers.getContractFactory('NomeDelTuoContratto');
-  console.log('Deploying contract...');
-  const contract = await ContractFactory.deploy(/* parametri del costruttore */);
-  await contract.deployed();
-  console.log('Contract deployed to:', contract.address);
+  console.log('Deploying MooveNFT contract...');
+  
+  const MooveNFT = await ethers.getContractFactory('MooveNFT');
+  const mooveNFT = await MooveNFT.deploy();
+  
+  await mooveNFT.waitForDeployment();
+  
+  const address = await mooveNFT.getAddress();
+  console.log('MooveNFT deployed to:', address);
+  
+  return address;
 }
 
 main()

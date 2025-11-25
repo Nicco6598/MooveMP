@@ -1,5 +1,5 @@
 import React from 'react';
-import { ethers } from 'ethers';
+import { formatEther } from 'ethers';
 
 export enum PurchaseStatus {
     BOUGHT = 'BOUGHT',
@@ -10,7 +10,7 @@ interface PurchaseItem {
     tokenId: number;
     buyer: string;
     seller: string;
-    price: ethers.BigNumber;
+    price: bigint;
     timestamp: number;
     status: PurchaseStatus;
 }
@@ -27,7 +27,7 @@ const NFTCard: React.FC<PurchaseItem> = ({ tokenId, buyer, seller, price, timest
             </p>
             <p></p>
             <p className={`text-lg font-bold bg-gradient-to-r ${status === PurchaseStatus.BOUGHT ? "from-green-500 to-teal-500" : "from-amber-500 to-red-500"} text-transparent mb-2 bg-clip-text inline-block truncate`}>
-                {ethers.utils.formatEther(price)} ETH
+                {formatEther(price)} ETH
             </p>
             <p className="text-gray-700 text-sm font-bold mb-1 truncate">Token ID: {tokenId}</p>
             <p className="text-gray-700 text-sm font-semibold mb-1 truncate">
@@ -41,3 +41,5 @@ const NFTCard: React.FC<PurchaseItem> = ({ tokenId, buyer, seller, price, timest
 };
 
 export default NFTCard;
+
+

@@ -1,24 +1,26 @@
 import React, { createContext, useState, useEffect, ReactNode } from 'react';
-import { ethers } from 'ethers';
+import { BrowserProvider } from 'ethers';
 
-export const ProviderContext = createContext<{
-  provider: ethers.providers.Web3Provider | null;
-  setProvider: React.Dispatch<React.SetStateAction<ethers.providers.Web3Provider | null>>;
-}>({
+interface ProviderContextType {
+  provider: BrowserProvider | null;
+  setProvider: React.Dispatch<React.SetStateAction<BrowserProvider | null>>;
+}
+
+export const ProviderContext = createContext<ProviderContextType>({
   provider: null,
   setProvider: () => {},
 });
 
-type ProviderProviderProps = {
+interface ProviderProviderProps {
   children: ReactNode;
-};
+}
 
 export const ProviderProvider: React.FC<ProviderProviderProps> = ({ children }) => {
-  const [provider, setProvider] = useState<ethers.providers.Web3Provider | null>(null);
+  const [provider, setProvider] = useState<BrowserProvider | null>(null);
 
   useEffect(() => {
     if (window.ethereum) {
-      setProvider(new ethers.providers.Web3Provider(window.ethereum));
+      setProvider(new BrowserProvider(window.ethereum));
     }
   }, []);
 
@@ -28,3 +30,4 @@ export const ProviderProvider: React.FC<ProviderProviderProps> = ({ children }) 
     </ProviderContext.Provider>
   );
 };
+

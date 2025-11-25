@@ -1,15 +1,6 @@
 {
-    "builds": [
-      {
-        "src": "nft_frontend/package.json",
-        "use": "@vercel/node"
-      }
-    ],
-    "routes": [
-      {
-        "src": "/(.*)",
-        "dest": "nft_frontend/$1"
-      }
-    ]
-  }
-  
+  "buildCommand": "pnpm run build",
+  "outputDirectory": "build",
+  "devCommand": "pnpm start",
+  "installCommand": "pnpm install"
+}

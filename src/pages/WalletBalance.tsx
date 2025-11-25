@@ -1,5 +1,5 @@
-import React, { useState, useEffect, useContext } from 'react';
-import { ethers } from 'ethers';
+import React, { useState, useEffect, useContext, useCallback } from 'react';
+import { formatEther } from 'ethers';
 import { ProviderContext } from './ProviderContext';
 
 interface WalletBalanceProps {
@@ -18,10 +18,10 @@ const WalletBalance: React.FC<WalletBalanceProps> = ({ account, showInFull = fal
       try {
         setIsLoading(true);
         setError('');
-        
+
         const balanceBigInt = await provider.getBalance(account);
-        const balanceInEth = parseFloat(ethers.utils.formatEther(balanceBigInt)).toFixed(4);
-        
+        const balanceInEth = parseFloat(formatEther(balanceBigInt)).toFixed(4);
+
         setBalance(balanceInEth);
       } catch (error) {
         console.error('Errore nel recupero del saldo:', error);
@@ -34,23 +34,23 @@ const WalletBalance: React.FC<WalletBalanceProps> = ({ account, showInFull = fal
 
   useEffect(() => {
     getBalance();
-    
+
     // Aggiorna il saldo ogni 30 secondi
     const intervalId = setInterval(() => {
       getBalance();
     }, 30000);
-    
+
     return () => clearInterval(intervalId);
   }, [provider, account]);
 
   if (showInFull) {
     return (
-      <div className="w-full bg-white/80 backdrop-blur-sm rounded-xl p-4 border border-neutral-200">
-        <div className="flex items-center justify-between mb-2">
-          <h3 className="text-sm font-medium text-neutral-700">Saldo Wallet</h3>
-          <button 
+      <div className="w-full">
+        <div className="flex items-center justify-between mb-3">
+          <h3 className="text-xs font-medium text-neutral-500 uppercase tracking-wider">Saldo Wallet</h3>
+          <button
             onClick={getBalance}
-            className="text-primary-500 hover:text-primary-600 p-1 rounded-full transition-colors"
+            className="text-neutral-500 hover:text-accent-400 p-1.5 rounded-lg hover:bg-white/5 transition-all"
             aria-label="Aggiorna saldo"
             disabled={isLoading}
           >
@@ -59,25 +59,27 @@ const WalletBalance: React.FC<WalletBalanceProps> = ({ account, showInFull = fal
             </svg>
           </button>
         </div>
-        
+
         {error ? (
-          <p className="text-red-600 text-sm">{error}</p>
+          <p className="text-red-400 text-sm">{error}</p>
         ) : isLoading ? (
           <div className="flex items-center space-x-2">
-            <div className="w-4 h-4 bg-neutral-200 rounded-full animate-pulse"></div>
-            <div className="h-6 w-24 bg-neutral-200 rounded animate-pulse"></div>
+            <div className="w-4 h-4 bg-neutral-800 rounded-full animate-pulse"></div>
+            <div className="h-6 w-24 bg-neutral-800 rounded animate-pulse"></div>
           </div>
         ) : (
-          <div className="flex items-center">
-            <svg className="w-5 h-5 text-primary-500 mr-2" viewBox="0 0 24 24" fill="currentColor">
-              <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm-1-13h2v6h-2zm0 8h2v2h-2z" />
-            </svg>
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-accent-500/20 to-accent-600/20 border border-accent-500/30 flex items-center justify-center">
+              <svg className="w-5 h-5 text-accent-400" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+            </div>
             <div>
-              <p className="text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-primary-500 to-accent-500">
+              <p className="text-2xl font-bold text-gradient">
                 {balance} ETH
               </p>
               <p className="text-xs text-neutral-500">
-                ~{(parseFloat(balance) * 3500).toFixed(2)} USD
+                ≈ ${(parseFloat(balance) * 3500).toFixed(2)} USD
               </p>
             </div>
           </div>
@@ -89,15 +91,13 @@ const WalletBalance: React.FC<WalletBalanceProps> = ({ account, showInFull = fal
   return (
     <div className="flex items-center">
       {error ? (
-        <p className="text-red-600 text-xs">Errore</p>
+        <p className="text-red-400 text-xs">Errore</p>
       ) : isLoading ? (
-        <div className="h-4 w-16 bg-neutral-200 rounded animate-pulse"></div>
+        <div className="h-4 w-16 bg-neutral-800 rounded animate-pulse"></div>
       ) : (
-        <div className="flex items-center space-x-1">
-          <svg className="w-3 h-3 text-primary-500" viewBox="0 0 24 24" fill="currentColor">
-            <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2z" />
-          </svg>
-          <p className="text-sm font-medium">{balance} ETH</p>
+        <div className="flex items-center space-x-1.5">
+          <div className="w-2 h-2 rounded-full bg-accent-500"></div>
+          <p className="text-sm font-medium text-neutral-200">{balance} ETH</p>
         </div>
       )}
     </div>

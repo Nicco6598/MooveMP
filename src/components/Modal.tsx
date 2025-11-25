@@ -54,20 +54,20 @@ export const Modal: React.FC<ModalProps> = ({
     };
 
     return (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm transition-opacity duration-300">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-neutral-950/80 backdrop-blur-sm transition-opacity duration-300">
             <div 
                 ref={modalRef}
-                className={`bg-white relative rounded-2xl shadow-xl ${sizeClasses[size]} w-full animate-[fadeIn_0.3s_ease-out]`}
+                className={`glass-card relative rounded-2xl shadow-2xl ${sizeClasses[size]} w-full animate-fadeIn`}
             >
                 {title && (
-                    <div className="border-b border-neutral-200 px-6 py-4">
-                        <h3 className="text-lg font-medium text-neutral-800">{title}</h3>
+                    <div className="border-b border-neutral-800/50 px-6 py-4">
+                        <h3 className="text-lg font-medium text-white">{title}</h3>
                     </div>
                 )}
                 
                 <button 
                     onClick={onClose}
-                    className="absolute top-4 right-4 p-1 rounded-full text-neutral-500 hover:text-neutral-700 hover:bg-neutral-100 transition-colors"
+                    className="absolute top-4 right-4 p-1.5 rounded-lg text-neutral-500 hover:text-white hover:bg-white/10 transition-colors"
                     aria-label="Chiudi"
                 >
                     <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -88,3 +88,4 @@ export const Modal: React.FC<ModalProps> = ({
 //   from { opacity: 0; transform: translateY(-20px); }
 //   to { opacity: 1; transform: translateY(0); }
 // }
+

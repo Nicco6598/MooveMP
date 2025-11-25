@@ -1,10 +1,6 @@
 import { HardhatUserConfig } from "hardhat/config";
-import '@nomiclabs/hardhat-ethers'; // Ethers plugin
-import '@nomiclabs/hardhat-waffle'; // Waffle plugin for testing
-
-// If you are using dotenv to manage environment variables
-// import * as dotenv from 'dotenv';
-// dotenv.config();
+import "@nomicfoundation/hardhat-toolbox";
+import "dotenv/config";
 
 const config: HardhatUserConfig = {
   solidity: {
@@ -18,14 +14,13 @@ const config: HardhatUserConfig = {
   },
   networks: {
     hardhat: {
-      // Configuration specific to the hardhat network
-      chainId: 1337 // Standard chain ID for local Hardhat network
+      chainId: 1337
     },
     sepolia: {
-      url: process.env.SEPOLIA_URL || "",
-      accounts: process.env.PRIVATE_KEY ? [process.env.PRIVATE_KEY] : []
-    },
-    // You can define other networks here as needed.
+      url: process.env.SEPOLIA_URL || "https://eth-sepolia.g.alchemy.com/v2/demo",
+      accounts: process.env.PRIVATE_KEY ? [process.env.PRIVATE_KEY] : [],
+      chainId: 11155111
+    }
   },
   paths: {
     sources: "./contracts",

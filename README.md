@@ -13,12 +13,13 @@ Benvenuti al repository del MooveMP, una piattaforma innovativa sviluppata da Mo
 
 - `contracts/`: Contiene gli Smart Contract del marketplace.
 - `artifacts/`: Contiene il JSON Abi per richiamare le funzioni dello smart contract.
-- `nft_frontend/`: Codice sorgente dell'interfaccia utente, costruita con React.
+- `src/`: Codice sorgente dell'interfaccia utente React.
+- `public/`: File statici del frontend.
 - `test/`: Test per gli Smart Contract utilizzando Hardhat.
 
 ## Setup Iniziale
 
-Prerequisiti: È necessario avere installato [Node.js](https://nodejs.org/), [npm](https://www.npmjs.com/) e [Hardhat](https://hardhat.org/getting-started/).
+Prerequisiti: È necessario avere installato [Node.js](https://nodejs.org/) e [npm](https://www.npmjs.com/).
 
 1. Clona il repository:
    ```bash
@@ -28,39 +29,29 @@ Prerequisiti: È necessario avere installato [Node.js](https://nodejs.org/), [np
 
 2. Installa le dipendenze:
    ```bash
-   npm install --legacy-peer-deps
+   npm install
    ```
 
 3. Compila gli smart contract:
    ```bash
-   npx hardhat compile
+   npm run compile
    ```
 
 4. Lancia i test degli smart contract:
    ```bash
-   npx hardhat test
+   npm test
    ```
 
 5. Deploy degli smart contract su Sepolia:
    ```bash
-   npx hardhat run scripts/deploy.ts --network sepolia
+   npm run deploy:sepolia
    ```
 
 ### Uso del Marketplace
 
 Per avviare l'interfaccia utente:
 
-1. Vai alla cartella del frontend:
-   ```bash
-   cd nft_frontend
-   ```
-
-1. Installa le dipendenze del frontend
-   ```bash
-   npm install
-   ```
-
-2. Avvia l'applicazione React:
+1. Avvia l'applicazione React:
    ```bash
    npm start
    ```
@@ -89,22 +80,22 @@ Per effettuare il deploy dello smart contract e quindi diventare l'Admin Moove (
    npm install dotenv
    ```
 
-1. **Configurazione del progetto**:
+2. **Configurazione del progetto**:
    - Assicurati di avere un file `.env` nella root del tuo progetto Hardhat che contiene le chiavi private del tuo wallet e l'API key per un provider come Infura, questo permetterà di interagire con la blockchain (trovi il file .env.example come template nella root del progetto).
    - Aggiorna il file `hardhat.config.ts` per includere le configurazioni della rete Sepolia, facendo riferimento alle credenziali nel file `.env` come riportato di seguito, aggiungilo sotto gli altri import.
    ```ts
    import * as dotenv from 'dotenv'; // Importa dotenv
    ```
 
-2. **Deploy**:
-   - Modifica il file template `deploy.ts` (contenuto nella cartella `MooveMP/scripts`) con i parametri corretti per il tuo progetto.
+3. **Deploy**:
+   - Modifica il file template `deploy.ts` (contenuto nella cartella `scripts`) con i parametri corretti per il tuo progetto.
    - Esegui il comando da terminale:
      ```bash
-     npx hardhat run scripts/deploy.ts --network sepolia
+     npm run deploy:sepolia
      ```
    - Al termine del deploy, lo script stamperà l'indirizzo dello smart contract deployato. Assicurati di annotarlo.
 
-3. **Diventare Admin Moove**:
+4. **Diventare Admin Moove**:
    - Una volta effettuato il deploy sarai automaticamente l'admin di Moove che potrà mintare gli NFT (Ovvero l'*OWNER* dello smart contract).
 
 ### Utilizzo di Remix con Injected Web3 Provider

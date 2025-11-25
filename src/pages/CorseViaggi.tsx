@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useContext } from 'react';
-import { ethers } from 'ethers';
+import { formatEther, parseEther } from 'ethers';
 import getContract from '../utils/getContract';
 import { ProviderContext } from './ProviderContext';
 import { Modal } from '../components/Modal';
@@ -7,7 +7,7 @@ import { Modal } from '../components/Modal';
 interface NFT {
   tokenId: number;
   owner: string;
-  price: ethers.BigNumber;
+  price: bigint;
   rarity: string;
   discount: string;
   discountOn: string;
@@ -24,8 +24,8 @@ const CorseViaggi: React.FC = () => {
   const [nfts, setNfts] = useState<NFT[]>([]);
   const [rideType, setRideType] = useState<string>('Monopattino');
   const [minutes, setMinutes] = useState<number>(15);
-  const [finalPrice, setFinalPrice] = useState<ethers.BigNumber>(ethers.BigNumber.from(0));
-  const [discountedPrice, setDiscountedPrice] = useState<ethers.BigNumber>(ethers.BigNumber.from(0));
+  const [finalPrice, setFinalPrice] = useState<bigint>(0n);
+  const [discountedPrice, setDiscountedPrice] = useState<bigint>(0n);
   const [maxDiscountValue, setMaxDiscountValue] = useState<number>(0);
   const [isPopupVisible, setIsPopupVisible] = useState<boolean>(false);
   const [locationStatus, setLocationStatus] = useState<string>('');
@@ -35,10 +35,10 @@ const CorseViaggi: React.FC = () => {
   const [elapsedTime, setElapsedTime] = useState<number>(0);
   const [isLoading, setIsLoading] = useState<boolean>(false);
 
-  const ridePrices: { [key: string]: ethers.BigNumber } = {
-    Monopattino: ethers.utils.parseEther('0.0005'),
-    'Auto Green': ethers.utils.parseEther('0.0025'),
-    'E-bike': ethers.utils.parseEther('0.0003'),
+  const ridePrices: { [key: string]: bigint } = {
+    Monopattino: parseEther('0.0005'),
+    'Auto Green': parseEther('0.0025'),
+    'E-bike': parseEther('0.0003'),
   };
 
   useEffect(() => {
@@ -50,9 +50,10 @@ const CorseViaggi: React.FC = () => {
         const contract = getContract(provider);
         const totalSupply = await contract.nextTokenId();
         const items: NFT[] = [];
-        const signerAddress = await provider.getSigner().getAddress();
+        const signer = await provider.getSigner();
+        const signerAddress = await signer.getAddress();
         
-        for (let i = 0; i < totalSupply.toNumber(); i++) {
+        for (let i = 0; i < Number(totalSupply); i++) {
           const owner = await contract.ownerOf(i);
           if (owner === signerAddress) {
             const tokenPrice = await contract.tokenPrices(i);
@@ -100,12 +101,12 @@ const CorseViaggi: React.FC = () => {
 
   const calculatePrices = () => {
     const fixedPrice = ridePrices[rideType];
-    let totalPrice = fixedPrice.mul(minutes);
+    let totalPrice = fixedPrice * BigInt(minutes);
     let totalDiscountedPrice = totalPrice;
 
     if (isNaN(minutes) || minutes <= 0) {
-      setFinalPrice(ethers.BigNumber.from(0));
-      setDiscountedPrice(ethers.BigNumber.from(0));
+      setFinalPrice(0n);
+      setDiscountedPrice(0n);
       setMaxDiscountValue(0);
       return;
     }
@@ -125,8 +126,8 @@ const CorseViaggi: React.FC = () => {
     });
 
     if (maxDiscount > 0) {
-      const discountAmount = totalPrice.mul(maxDiscount).div(100);
-      totalDiscountedPrice = totalDiscountedPrice.sub(discountAmount);
+      const discountAmount = (totalPrice * BigInt(maxDiscount)) / 100n;
+      totalDiscountedPrice = totalDiscountedPrice - discountAmount;
     }
 
     setFinalPrice(totalPrice);
@@ -188,37 +189,43 @@ const CorseViaggi: React.FC = () => {
   const selectedVehicle = vehicleTypes.find(v => v.id === rideType) || vehicleTypes[0];
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      <div className="flex flex-col items-center mb-10">
-        <h1 className="text-3xl md:text-4xl font-display font-bold text-transparent bg-clip-text bg-gradient-to-r from-primary-500 to-secondary-500 mb-4">
-          Mobilità Urbana
-        </h1>
-        <p className="text-neutral-600 max-w-2xl text-center mb-6">
-          Prenota un veicolo e approfitta degli sconti NFT per risparmiare sui tuoi spostamenti.
-        </p>
+    <div className="min-h-screen">
+      {/* Hero */}
+      <div className="relative overflow-hidden">
+        <div className="absolute inset-0 bg-gradient-radial from-accent-500/10 via-transparent to-transparent" />
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 pt-16 pb-12">
+          <div className="text-center max-w-3xl mx-auto">
+            <h1 className="text-4xl md:text-5xl font-display font-bold text-white mb-4">
+              Mobilità <span className="text-gradient">Urbana</span>
+            </h1>
+            <p className="text-lg text-neutral-400">
+              Prenota un veicolo e approfitta degli sconti NFT per risparmiare sui tuoi spostamenti.
+            </p>
+          </div>
+        </div>
       </div>
 
-      <div className="max-w-4xl mx-auto">
-        <div className="bg-white/90 backdrop-blur-lg rounded-2xl overflow-hidden border border-neutral-200 shadow-lg">
+      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 pb-16">
+        <div className="max-w-4xl mx-auto glass-card rounded-2xl overflow-hidden">
           {rideStarted ? (
             <div className="p-6">
               <div className="flex flex-col items-center text-center mb-8">
-                <div className="w-20 h-20 flex items-center justify-center bg-primary-100 rounded-full mb-4">
+                <div className="w-20 h-20 flex items-center justify-center bg-accent-500/20 rounded-2xl border border-accent-500/30 mb-4">
                   <span className="text-4xl">{selectedVehicle.icon}</span>
                 </div>
-                <h2 className="text-2xl font-bold mb-2">Corsa in corso</h2>
-                <p className="text-neutral-600">Stai utilizzando un {selectedVehicle.name}</p>
+                <h2 className="text-2xl font-bold text-white mb-2">Corsa in corso</h2>
+                <p className="text-neutral-400">Stai utilizzando un {selectedVehicle.name}</p>
               </div>
               
-              <div className="bg-primary-50 rounded-xl p-6 mb-6 flex flex-col items-center">
-                <p className="text-primary-700 mb-2">Tempo trascorso</p>
-                <p className="text-4xl font-mono font-bold text-primary-800 mb-4">{formatTime(elapsedTime)}</p>
-                <p className="text-sm text-neutral-600">Costo attuale: {ethers.utils.formatEther(discountedPrice)} ETH</p>
+              <div className="bg-accent-500/10 rounded-xl p-6 mb-6 flex flex-col items-center border border-accent-500/20">
+                <p className="text-neutral-400 mb-2">Tempo trascorso</p>
+                <p className="text-4xl font-mono font-bold text-white mb-4">{formatTime(elapsedTime)}</p>
+                <p className="text-sm text-neutral-400">Costo attuale: <span className="text-gradient font-semibold">{formatEther(discountedPrice)} ETH</span></p>
               </div>
               
               <button
                 onClick={stopRideHandler}
-                className="w-full py-3 bg-red-500 text-white font-medium rounded-xl hover:bg-red-600 transition-colors shadow-sm"
+                className="w-full py-3 bg-red-500 text-white font-medium rounded-xl hover:bg-red-600 transition-colors"
               >
                 Termina corsa
               </button>
@@ -226,26 +233,26 @@ const CorseViaggi: React.FC = () => {
           ) : (
             <div className="grid md:grid-cols-2">
               <div className="p-6 flex flex-col">
-                <h2 className="text-xl font-bold mb-6">Seleziona il tuo veicolo</h2>
+                <h2 className="text-xl font-bold text-white mb-6">Seleziona il tuo veicolo</h2>
                 
                 <div className="space-y-3 mb-6">
                   {vehicleTypes.map(vehicle => (
                     <button
                       key={vehicle.id}
                       onClick={() => setRideType(vehicle.id)}
-                      className={`w-full flex items-center p-3 rounded-xl border-2 transition-all ${
+                      className={`w-full flex items-center p-3 rounded-xl border transition-all ${
                         rideType === vehicle.id 
-                          ? 'border-primary-500 bg-primary-50' 
-                          : 'border-neutral-200 bg-white hover:border-neutral-300'
+                          ? 'border-accent-500/50 bg-accent-500/10' 
+                          : 'border-neutral-800 bg-neutral-900/50 hover:border-neutral-700'
                       }`}
                     >
                       <span className="text-2xl mr-3">{vehicle.icon}</span>
                       <div className="flex-1 text-left">
-                        <p className="font-medium">{vehicle.name}</p>
+                        <p className="font-medium text-white">{vehicle.name}</p>
                         <p className="text-sm text-neutral-500">{vehicle.basePrice} ETH / minuto</p>
                       </div>
                       {rideType === vehicle.id && (
-                        <svg className="w-5 h-5 text-primary-500" fill="currentColor" viewBox="0 0 20 20">
+                        <svg className="w-5 h-5 text-accent-500" fill="currentColor" viewBox="0 0 20 20">
                           <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
                         </svg>
                       )}
@@ -254,13 +261,13 @@ const CorseViaggi: React.FC = () => {
                 </div>
                 
                 <div className="mb-6">
-                  <label className="block text-sm font-medium text-neutral-700 mb-2">
+                  <label className="block text-sm font-medium text-neutral-300 mb-2">
                     Tempo stimato (minuti)
                   </label>
                   <div className="flex items-center">
                     <button
                       onClick={() => setMinutes(prev => (prev > 1 ? prev - 5 : 1))}
-                      className="p-2 bg-neutral-100 rounded-l-lg text-neutral-700 hover:bg-neutral-200 transition-colors"
+                      className="p-2.5 bg-neutral-800 rounded-l-xl text-neutral-300 hover:bg-neutral-700 transition-colors border border-neutral-700"
                     >
                       <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M20 12H4" />
@@ -273,12 +280,12 @@ const CorseViaggi: React.FC = () => {
                         const newValue = Number(e.target.value);
                         setMinutes(newValue >= 1 ? newValue : 1);
                       }}
-                      className="flex-1 border-y border-neutral-300 p-2 text-center"
+                      className="flex-1 bg-neutral-900 border-y border-neutral-700 p-2.5 text-center text-white"
                       min="1"
                     />
                     <button
                       onClick={() => setMinutes(prev => prev + 5)}
-                      className="p-2 bg-neutral-100 rounded-r-lg text-neutral-700 hover:bg-neutral-200 transition-colors"
+                      className="p-2.5 bg-neutral-800 rounded-r-xl text-neutral-300 hover:bg-neutral-700 transition-colors border border-neutral-700"
                     >
                       <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
@@ -288,12 +295,12 @@ const CorseViaggi: React.FC = () => {
                 </div>
                 
                 {maxDiscountValue > 0 && (
-                  <div className="mb-6 p-3 bg-green-50 border border-green-200 rounded-xl">
+                  <div className="mb-6 p-3 bg-green-500/10 border border-green-500/20 rounded-xl">
                     <div className="flex items-center">
-                      <svg className="w-5 h-5 text-green-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <svg className="w-5 h-5 text-green-400 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                       </svg>
-                      <p className="text-sm font-medium text-green-700">
+                      <p className="text-sm font-medium text-green-400">
                         Sconto NFT applicato: {maxDiscountValue}%
                       </p>
                     </div>
@@ -301,25 +308,25 @@ const CorseViaggi: React.FC = () => {
                 )}
                 
                 <div className="mt-auto">
-                  <div className="bg-neutral-50 rounded-xl p-4 mb-4">
+                  <div className="bg-neutral-900/50 rounded-xl p-4 mb-4 border border-neutral-800/50">
                     <div className="flex justify-between mb-2">
-                      <p className="text-sm text-neutral-600">Prezzo base:</p>
-                      <p className="text-sm font-medium">{ethers.utils.formatEther(finalPrice)} ETH</p>
+                      <p className="text-sm text-neutral-500">Prezzo base:</p>
+                      <p className="text-sm font-medium text-neutral-300">{formatEther(finalPrice)} ETH</p>
                     </div>
                     
                     {maxDiscountValue > 0 && (
                       <div className="flex justify-between mb-2">
-                        <p className="text-sm text-neutral-600">Sconto ({maxDiscountValue}%):</p>
-                        <p className="text-sm font-medium text-green-600">
-                          -{ethers.utils.formatEther(finalPrice.sub(discountedPrice))} ETH
+                        <p className="text-sm text-neutral-500">Sconto ({maxDiscountValue}%):</p>
+                        <p className="text-sm font-medium text-green-400">
+                          -{formatEther(finalPrice - discountedPrice)} ETH
                         </p>
                       </div>
                     )}
                     
-                    <div className="flex justify-between font-bold pt-2 border-t border-neutral-200">
-                      <p>Totale:</p>
-                      <p className="text-transparent bg-clip-text bg-gradient-to-r from-primary-500 to-accent-500">
-                        {ethers.utils.formatEther(discountedPrice)} ETH
+                    <div className="flex justify-between font-bold pt-2 border-t border-neutral-800">
+                      <p className="text-white">Totale:</p>
+                      <p className="text-gradient">
+                        {formatEther(discountedPrice)} ETH
                       </p>
                     </div>
                   </div>
@@ -327,7 +334,7 @@ const CorseViaggi: React.FC = () => {
                   <button 
                     onClick={handleStartRide} 
                     disabled={isLoading}
-                    className="w-full py-3 bg-primary-500 text-white font-medium rounded-xl hover:bg-primary-600 transition-colors shadow-sm flex items-center justify-center"
+                    className="w-full py-3 bg-accent-500 text-white font-medium rounded-xl hover:bg-accent-600 transition-colors shadow-lg shadow-accent-500/20 flex items-center justify-center"
                   >
                     {isLoading ? (
                       <>
@@ -346,19 +353,19 @@ const CorseViaggi: React.FC = () => {
                 </div>
               </div>
               
-              <div className="bg-neutral-100 p-6 flex items-center justify-center">
+              <div className="bg-neutral-900/50 p-6 flex items-center justify-center border-l border-neutral-800/50">
                 <div className="text-center">
-                  <div className="w-48 h-48 mx-auto mb-4 bg-white rounded-full shadow-md flex items-center justify-center">
+                  <div className="w-48 h-48 mx-auto mb-4 bg-neutral-800 rounded-2xl border border-neutral-700 flex items-center justify-center">
                     <span className="text-8xl">{selectedVehicle.icon}</span>
                   </div>
-                  <h3 className="text-xl font-bold mb-2">{selectedVehicle.name}</h3>
-                  <p className="text-neutral-600 mb-4">
+                  <h3 className="text-xl font-bold text-white mb-2">{selectedVehicle.name}</h3>
+                  <p className="text-neutral-400 mb-4">
                     Velocità massima: {rideType === 'Auto Green' ? '80 km/h' : rideType === 'Monopattino' ? '25 km/h' : '35 km/h'}
                   </p>
-                  <div className="flex justify-center space-x-2">
-                    <span className="px-2 py-1 bg-green-100 text-green-700 rounded-full text-xs font-medium">Eco-Friendly</span>
-                    <span className="px-2 py-1 bg-blue-100 text-blue-700 rounded-full text-xs font-medium">Elettrico</span>
-                    <span className="px-2 py-1 bg-purple-100 text-purple-700 rounded-full text-xs font-medium">Smart</span>
+                  <div className="flex justify-center gap-2">
+                    <span className="px-2.5 py-1 bg-green-500/20 text-green-400 rounded-lg text-xs font-medium border border-green-500/30">Eco-Friendly</span>
+                    <span className="px-2.5 py-1 bg-blue-500/20 text-blue-400 rounded-lg text-xs font-medium border border-blue-500/30">Elettrico</span>
+                    <span className="px-2.5 py-1 bg-purple-500/20 text-purple-400 rounded-lg text-xs font-medium border border-purple-500/30">Smart</span>
                   </div>
                 </div>
               </div>
@@ -368,16 +375,16 @@ const CorseViaggi: React.FC = () => {
 
         {nfts.length > 0 && (
           <div className="mt-8">
-            <h2 className="text-xl font-bold mb-4">I tuoi NFT con sconti mobilità</h2>
+            <h2 className="text-xl font-bold text-white mb-4">I tuoi NFT con sconti mobilità</h2>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               {nfts.filter(nft => nft.discountOn.includes("Viaggi")).map(nft => (
-                <div key={nft.tokenId} className="bg-white/80 backdrop-blur-sm rounded-xl border border-neutral-200 p-4 flex items-center">
-                  <div className="bg-primary-100 rounded-full w-12 h-12 flex items-center justify-center mr-4">
-                    <span className="text-xl">{nft.tokenId}</span>
+                <div key={nft.tokenId} className="glass-card rounded-xl p-4 flex items-center">
+                  <div className="bg-accent-500/20 rounded-xl w-12 h-12 flex items-center justify-center mr-4 border border-accent-500/30">
+                    <span className="text-xl font-mono text-accent-400">#{nft.tokenId}</span>
                   </div>
                   <div>
-                    <p className="font-medium">{nft.rarity} NFT</p>
-                    <p className="text-sm text-primary-600">{nft.discount} su {nft.discountOn}</p>
+                    <p className="font-medium text-white">{nft.rarity} NFT</p>
+                    <p className="text-sm text-accent-400">{nft.discount} su {nft.discountOn}</p>
                   </div>
                 </div>
               ))}
@@ -394,17 +401,17 @@ const CorseViaggi: React.FC = () => {
         size="lg"
       >
         <div className="text-center">
-          <div className="w-16 h-16 mx-auto mb-4 bg-primary-100 rounded-full flex items-center justify-center">
+          <div className="w-16 h-16 mx-auto mb-4 bg-accent-500/20 rounded-2xl flex items-center justify-center border border-accent-500/30">
             <span className="text-3xl">{selectedVehicle.icon}</span>
           </div>
           
-          <h3 className="text-xl font-medium mb-2">{selectedVehicle.name}</h3>
-          <p className={`text-lg ${locationStatus.includes('zona di Milano') ? 'text-green-600' : 'text-red-600'} mb-4`}>
+          <h3 className="text-xl font-medium text-white mb-2">{selectedVehicle.name}</h3>
+          <p className={`text-lg ${locationStatus.includes('zona di Milano') ? 'text-green-400' : 'text-red-400'} mb-4`}>
             {locationStatus}
           </p>
           
           {userLatitude && userLongitude && (
-            <div className="mb-6 rounded-xl overflow-hidden border border-neutral-200 h-64">
+            <div className="mb-6 rounded-xl overflow-hidden border border-neutral-700 h-64">
               <iframe 
                 src={`https://www.openstreetmap.org/export/embed.html?bbox=${userLongitude - 0.01},${userLatitude - 0.01},${userLongitude + 0.01},${userLatitude + 0.01}&layer=mapnik&marker=${userLatitude},${userLongitude}`}
                 width="100%" 
@@ -415,10 +422,10 @@ const CorseViaggi: React.FC = () => {
             </div>
           )}
           
-          <div className="flex justify-center space-x-4">
+          <div className="flex justify-center gap-3">
             <button 
               onClick={() => setIsPopupVisible(false)} 
-              className="px-4 py-2 border border-neutral-300 text-neutral-700 rounded-lg hover:bg-neutral-100 transition-colors"
+              className="px-5 py-2.5 bg-neutral-800 text-neutral-200 rounded-xl border border-neutral-700 hover:bg-neutral-700 transition-colors"
             >
               Annulla
             </button>
@@ -426,7 +433,7 @@ const CorseViaggi: React.FC = () => {
             {locationStatus.includes('zona di Milano') && (
               <button 
                 onClick={startRideHandler} 
-                className="px-4 py-2 bg-primary-500 text-white rounded-lg hover:bg-primary-600 transition-colors"
+                className="px-5 py-2.5 bg-accent-500 text-white rounded-xl hover:bg-accent-600 transition-colors shadow-lg shadow-accent-500/20"
               >
                 Inizia Corsa
               </button>
@@ -439,3 +446,4 @@ const CorseViaggi: React.FC = () => {
 };
 
 export default CorseViaggi;
+
