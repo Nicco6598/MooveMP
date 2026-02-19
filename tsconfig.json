@@ -30,9 +30,7 @@
     }
   },
   "include": [
-    "src",
-    "scripts",
-    "test"
+    "src"
   ],
   "exclude": [
     "node_modules",
