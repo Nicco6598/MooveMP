@@ -4,12 +4,13 @@
   "description": "An NFT Marketplace developed with Solidity, React and Hardhat",
   "private": true,
   "scripts": {
-    "start": "react-scripts start",
-    "build": "react-scripts build",
-    "test:frontend": "react-scripts test",
+    "dev": "vite",
+    "start": "vite",
+    "build": "tsc && vite build",
+    "preview": "vite preview",
+    "test:frontend": "vitest",
     "test:contracts": "hardhat test",
     "test": "hardhat test",
-    "eject": "react-scripts eject",
     "compile": "hardhat compile",
     "deploy:sepolia": "hardhat run scripts/deploy.ts --network sepolia"
   },
@@ -33,22 +34,20 @@
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "react-router-dom": "^7.0.2",
-    "react-scripts": "5.0.1",
     "web-vitals": "^4.2.4"
   },
   "devDependencies": {
     "@babel/plugin-transform-private-property-in-object": "^7.25.9",
     "@nomicfoundation/hardhat-toolbox": "^5.0.0",
+    "@vitejs/plugin-react-swc": "^4.2.3",
+    "autoprefixer": "^10.4.24",
     "hardhat": "^2.22.17",
+    "postcss": "^8.5.6",
     "tailwindcss": "^3.4.18",
     "ts-node": "^10.9.2",
-    "typescript": "^5.3.3"
-  },
-  "eslintConfig": {
-    "extends": [
-      "react-app",
-      "react-app/jest"
-    ]
+    "typescript": "^5.3.3",
+    "vite": "^7.3.1",
+    "vite-tsconfig-paths": "^6.1.1"
   },
   "browserslist": {
     "production": [
