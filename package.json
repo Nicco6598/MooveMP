@@ -3,6 +3,7 @@
   "version": "2.0.0",
   "description": "An NFT Marketplace developed with Solidity, React and Hardhat",
   "private": true,
+  "packageManager": "pnpm@11.25.0",
   "scripts": {
     "dev": "vite",
     "start": "vite",
